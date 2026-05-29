@@ -1,0 +1,44 @@
+name: Build NEXOS ISO
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Install live-build
+        run: |
+          sudo apt update
+          sudo apt install -y live-build
+      
+      - name: Build NEXOS ISO
+        run: |
+          cd nexos-live
+          chmod +x build.sh
+          ./build.sh
+      
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexos-iso
+          path: nexos-live/live-image-amd64.hybrid.iso
+          retention-days: 30
+      
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: nexos-live/live-image-amd64.hybrid.iso
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
