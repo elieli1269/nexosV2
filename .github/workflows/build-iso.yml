@@ -12,21 +12,30 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Install live-build
+      - name: Install build dependencies
         run: |
           sudo apt update
-          sudo apt install -y live-build
+          sudo apt install -y live-build debootstrap xorriso syslinux-utils isolinux rsync genisoimage squashfs-tools
       
-      - name: Build NEXOS ISO
+      - name: Prepare & Build NEXOS ISO (debug enabled)
         run: |
+          set -euxo pipefail
+          ls -la
+          if [ ! -d "nexos-live" ]; then echo "nexos-live directory not found"; exit 2; fi
           cd nexos-live
+          pwd
+          echo "---- build.sh content ----"
+          sed -n '1,200p' build.sh || true
           chmod +x build.sh
-          ./build.sh
+          bash -x ./build.sh 2>&1 | tee build.log
+          tail -n 200 build.log || true
       
       - name: Upload ISO artifact
         uses: actions/upload-artifact@v4

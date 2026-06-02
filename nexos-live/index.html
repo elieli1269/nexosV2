@@ -513,7 +513,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Outfit',sans-serif
               </div>
             </div>
             <div id="nsload"><div class="sp"></div><p id="nslt">Chargement...</p></div>
-            <iframe id="nsif" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+            <iframe id="nsif" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation" allow="fullscreen"></iframe>
             <div id="nsfl">
               <div class="nab"><div class="nai">N</div><div><div class="nal">NEX AI</div><div class="nat" id="natxt">Résultats locaux NEXSEARCH.</div></div></div>
             </div>
@@ -954,11 +954,29 @@ function qs(q){document.getElementById('nsq').value=q;nsTab('web');doSearch();}
 function doSearch(){
   const q=document.getElementById('nsq').value.trim();if(!q)return;
   if(nTabS==='files'){document.getElementById('fsr').value=q;filterF();ntf('NEXSEARCH','Recherche dans les fichiers');return;}
+  // Support direct URL or raw HTML paste
   nsTab('web');openW('ws');
   const home=document.getElementById('nshome'),ld=document.getElementById('nsload'),iframe=document.getElementById('nsif'),fl=document.getElementById('nsfl');
   home.style.display='none';fl.style.display='none';iframe.style.display='none';ld.style.display='flex';clearTimeout(ifrT);
   document.getElementById('nslt').textContent='Recherche "'+q+'"...';document.getElementById('wsst').textContent='Chargement...';
-  iframe.src=srcU[cSrc](q);
+
+  const isHTML = /^\s*<\/?(html|!doctype|body|div|span|p|h1)/i.test(q) || q.trim().startsWith('<');
+  const hasScheme = /^https?:\/\//i.test(q);
+  const looksLikeDomain = /^[^\s]+\.[^\s]{2,}/.test(q) && !q.includes(' ');
+
+  let targetSrc;
+  if(isHTML){
+    // Render raw HTML pasted into the search box
+    targetSrc = 'data:text/html;charset=utf-8,' + encodeURIComponent(q);
+  } else if(hasScheme || looksLikeDomain){
+    // Open URL directly (add https if missing)
+    targetSrc = hasScheme ? q : ('https://' + q);
+  } else {
+    // Normal web search
+    targetSrc = srcU[cSrc](q);
+  }
+
+  iframe.src = targetSrc;
   let ok=false;
   iframe.onload=()=>{ok=true;ld.style.display='none';iframe.style.display='block';document.getElementById('wsst').textContent='"'+q+'"';ntf('NEXSEARCH','Résultats chargés');};
   ifrT=setTimeout(()=>{
@@ -969,7 +987,21 @@ function doSearch(){
       const ql=q.toLowerCase();for(const[k,v]of Object.entries(aiKB)){if(ql.includes(k)){ans=v;break;}}
       document.getElementById('natxt').textContent=ans;
       fl.querySelectorAll('.nsr').forEach(r=>r.remove());
-      [{t:q+' — Résultats web',u:{g:'google.com',b:'bing.com',d:'duckduckgo.com'}[cSrc],d:'Via '+{g:'Google',b:'Bing',d:'DuckDuckGo'}[cSrc]+'.'},{t:'Guide : '+q,u:'docs.nexos.dev',d:'Documentation NEXOS.'},{t:q+' — NEXA',u:'nexa.nexos.dev',d:'Communauté NEXOS.'}].forEach(f=>{const d=document.createElement('div');d.className='nsr';d.innerHTML=`<div class="nsrs">◈ ${f.u}</div><div class="nsrt">${f.t}</div><div class="nsrd">${f.d}</div>`;fl.appendChild(d);});
+      [{t:q+' — Résultats web',u:{g:'google.com',b:'bing.com',d:'duckduckgo.com'}[cSrc],d:'Via '+{g:'Google',b:'Bing',d:'DuckDuckGo'}[cSrc]+'.'},{t:'Guide : '+q,u:'docs.nexos.dev',d:'Documentation NEXOS.'},{t:q+' — NEXA',u:'nexa.nexos.dev',d:'Communauté NEXOS.'}].forEach(f=>{
+        const d=document.createElement('div');
+        d.className='nsr';
+        d.innerHTML=`<div class="nsrs">◈ ${f.u}</div><div class="nsrt">${f.t}</div><div class="nsrd">${f.d}</div>`;
+        // make clickable: open in iframe and maximize search window
+        d.style.cursor='pointer';
+        d.onclick = ()=>{
+          const url = (/^https?:\/\//i.test(f.u) ? f.u : 'https://'+f.u);
+          ld.style.display='none'; fl.style.display='none'; iframe.style.display='block';
+          iframe.src = url;
+          ntf('NEXSEARCH',`Ouverture : ${f.t}`);
+          try{ maxWin('ws'); }catch(e){}
+        };
+        fl.appendChild(d);
+      });
     }
   },3000);
 }
@@ -1110,9 +1142,12 @@ const PKGS=[
   {n:'nex-usb-clone',d:'Cloner la clé USB NEXOS',v:'1.1.0',cat:'usb',ic:'💾',col:'linear-gradient(135deg,#0d9488,#0ea5e9)',installed:false,enabled:false},
   {n:'nex-usb-encrypt',d:'Chiffrement AES-256 USB',v:'1.0.0',cat:'usb',ic:'🔒',col:'linear-gradient(135deg,#6366f1,#8b5cf6)',installed:false,enabled:false},
   {n:'nex-persist-mgr',d:'Gestion partition persistante',v:'1.2.1',cat:'usb',ic:'🔌',col:'linear-gradient(135deg,#059669,#0d9488)',installed:true,enabled:true},
-  {n:'nex-tableur',d:'Tableur NEX compatible Excel / CSV',v:'1.0.0',cat:'game',ic:'📊',col:'linear-gradient(135deg,#2563eb,#7dd3fc)',installed:true,enabled:true},
-  {n:'nex-docs',d:'Gestionnaire de documents et notes',v:'1.0.0',cat:'game',ic:'📄',col:'linear-gradient(135deg,#f97316,#facc15)',installed:true,enabled:true},
-  {n:'nex-excel-lite',d:'Classeur Excel léger pour tableaux',v:'1.0.0',cat:'game',ic:'📈',col:'linear-gradient(135deg,#22c55e,#86efac)',installed:false,enabled:false},
+  {n:'libreoffice-calc',d:'LibreOffice Calc (tableur)',v:'7.6.0',cat:'app',ic:'📊',col:'linear-gradient(135deg,#2563eb,#7dd3fc)',installed:true,enabled:true},
+  {n:'onlyoffice',d:'OnlyOffice (documents & tableur)',v:'7.2.0',cat:'app',ic:'📄',col:'linear-gradient(135deg,#f97316,#facc15)',installed:false,enabled:false},
+  {n:'nex-tableur',d:'Tableur NEX compatible Excel / CSV (démo)',v:'1.0.0',cat:'app',ic:'📈',col:'linear-gradient(135deg,#22c55e,#86efac)',installed:true,enabled:true},
+  {n:'vscodium',d:'Editeur de code léger (VSCodium)',v:'1.90.0',cat:'dev',ic:'🛠️',col:'linear-gradient(135deg,#7c3aed,#06b6d4)',installed:false,enabled:false},
+  {n:'mpv',d:'Lecteur multimédia léger (mpv)',v:'1.8.0',cat:'app',ic:'🎬',col:'linear-gradient(135deg,#0ea5e9,#6366f1)',installed:false,enabled:false},
+  {n:'nex-games-ext',d:'Jeux externes et arcade web',v:'1.0.0',cat:'game',ic:'🌐',col:'linear-gradient(135deg,#f97316,#fb7185)',installed:false,enabled:false},
   {n:'nex-edu-quiz',d:'Quiz éducatif interactif',v:'1.1.0',cat:'game',ic:'🧠',col:'linear-gradient(135deg,#0ea5e9,#60a5fa)',installed:false,enabled:false},
   {n:'nex-lecon',d:'Cours et tutoriels rapides',v:'1.0.1',cat:'game',ic:'📘',col:'linear-gradient(135deg,#a855f7,#f472b6)',installed:false,enabled:false},
   {n:'nex-gen-studio',d:'Générateur d’idées créatives',v:'1.0.0',cat:'game',ic:'✨',col:'linear-gradient(135deg,#8b5cf6,#c084fc)',installed:false,enabled:false},
@@ -1136,7 +1171,7 @@ function uninstallApp(i){const p=PKGS[i];if(!p.installed)return; p.installed=fal
 const GAME_HUB=[
   {cat:'bureau',title:'Mode Bureautique',items:[
     {name:'Tableur NEX',desc:'Crée et édite des tableaux Excel/CSV rapidement.',icon:'📊',action:'editor'},
-    {name:'NEX Excel Lite',desc:'Classeur léger pour tableaux et calculs simples.',icon:'📈',action:'files',query:'tableur excel en ligne gratuit'},
+    {name:'Calc (LibreOffice)',desc:'Ouvre LibreOffice Calc (si installé) ou démo tableur.',icon:'📈',action:'external',url:'https://www.offidocs.com/online-excel-editor.php'},
   ]},
   {cat:'education',title:'Mode Éducation',items:[
     {name:'ÉduQuiz',desc:'Quiz interactif pour réviser en s’amusant.',icon:'🧠',action:'ai',prompt:'Crée un petit quiz de 5 questions sur l’histoire de France.'},
@@ -1152,17 +1187,51 @@ const GAME_HUB=[
   ]},
   {cat:'gazmer',title:'Mode Gazmer',items:[
     {name:'Gazmer Arena',desc:'Arcade et mini-jeux pour se détendre.',icon:'🎮',action:'search',query:'jeux d’arcade gratuits et rapides'},
-    {name:'Jeux Externes',desc:'Accède à des jeux web et extensions externes.',icon:'🌐',action:'search',query:'jeux en ligne externes gratuits'},
+    {name:'Itch.io',desc:'Jeux indépendants — collection itch.io',icon:'🌐',action:'external',url:'https://itch.io/play'},
+    {name:'Arcade Web',desc:'Sélection de jeux web (HTML5)',icon:'🕹️',action:'external',url:'https://www.retrogames.cz/'},
   ]},
 ];
 let currentGameHub='bureau';
 function gameHubTab(cat){currentGameHub=cat;document.querySelectorAll('#wgh .zb2[data-cat]').forEach(b=>{b.classList.toggle('on',b.dataset.cat===cat);});renderGameHub();}
 function renderGameHub(){const panel=document.getElementById('game-hub-list');const section=GAME_HUB.find(g=>g.cat===currentGameHub)||GAME_HUB[0];panel.innerHTML=section.items.map((it,i)=>`<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;"><div style="font-size:24px;">${it.icon}</div><div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.87);">${it.name}</div><div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:4px;">${it.desc}</div></div><button class="zb2" style="align-self:flex-start;" onclick="launchGame('${currentGameHub}',${i})">Lancer</button></div>`).join('');
 }
-function launchGame(cat,i){const section=GAME_HUB.find(g=>g.cat===cat); if(!section)return; const item=section.items[i]; if(!item)return; switch(item.action){case 'editor':openW('we');ntf('Hub Jeux',`Ouvre ${item.name}`);break;case 'files':openW('ws');nsTab('files');ntf('Hub Jeux',`Ouvre ${item.name}`);break;case 'ai':openW('wa');document.getElementById('aii').value=item.prompt||'';ntf('Hub Jeux',`Prêt pour ${item.name}`);break;case 'search':openW('ws');document.getElementById('nsq').value=item.query||'';nsTab('web');doSearch();ntf('Hub Jeux',`Recherche : ${item.name}`);break;default:ntf('Hub Jeux',`Lancement : ${item.name}`);} }
+function launchGame(cat,i){const section=GAME_HUB.find(g=>g.cat===cat); if(!section)return; const item=section.items[i]; if(!item)return; switch(item.action){case 'editor':openW('we');ntf('Hub Jeux',`Ouvre ${item.name}`);break;case 'files':openW('ws');nsTab('files');ntf('Hub Jeux',`Ouvre ${item.name}`);break;case 'ai':openW('wa');document.getElementById('aii').value=item.prompt||'';ntf('Hub Jeux',`Prêt pour ${item.name}`);break;case 'search':openW('ws');document.getElementById('nsq').value=item.query||'';nsTab('web');doSearch();ntf('Hub Jeux',`Recherche : ${item.name}`);break;case 'external':if(!item.url){ntf('Hub Jeux','Aucune URL fournie pour '+item.name);break;}openW('ws');document.getElementById('nsif').style.display='block';document.getElementById('nsfl').style.display='none';document.getElementById('nsif').src=item.url;ntf('Hub Jeux',`Ouverture externe: ${item.name}`);break;default:ntf('Hub Jeux',`Lancement : ${item.name}`);} }
 
 // ══ PARAMÈTRES ══
 function cfgNav(s,el){document.querySelectorAll('.cfgni').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.cfgs').forEach(x=>x.classList.remove('on'));el.classList.add('on');document.getElementById('cfg-'+s).classList.add('on');}
+
+// Handle simple AI-driven actions (e.g. change wallpaper)
+function setWallpaper(val){
+  if(!val) return;
+  if(/^https?:\/\//i.test(val) || /^data:/i.test(val)){
+    document.documentElement.style.setProperty('--bg', `url("${val}") center/cover`);
+  }else if(/^(linear|radial)-gradient/.test(val)){
+    document.documentElement.style.setProperty('--bg', val);
+  }else{
+    document.documentElement.style.setProperty('--bg', val);
+  }
+}
+
+function handleAIAction(text){
+  if(!text) return;
+  const t=text.toLowerCase();
+  if(/fond d\'ecran|fond d ecran|changer.*fond|change.*fond|wallpaper|background/.test(t)){
+    // try to find a URL or data image
+    const urlMatch = text.match(/(https?:\/\/[^\s"']+)/i) || text.match(/data:image\/[a-z0-9+\-.;=,%]+/i);
+    const colMatch = text.match(/#([a-f0-9]{6}|[a-f0-9]{3})/i);
+    let v = null;
+    if(urlMatch) v = urlMatch[0];
+    else if(colMatch) v = colMatch[0];
+    // open system settings
+    const cfgs = Array.from(document.querySelectorAll('.cfgni'));
+    const sysBtn = cfgs.find(b=>/syst/i.test(b.textContent));
+    if(sysBtn) cfgNav('sys', sysBtn);
+    // apply wallpaper
+    if(v) setWallpaper(v);
+    else setWallpaper('linear-gradient(135deg,#0ea5e9,#6366f1)');
+    ntf("NEX AI","Fond d'écran modifié");
+  }
+}
 function updG(){const k=document.getElementById('gkey').value.trim(),b=document.getElementById('gst');if(k.startsWith('gsk_')&&k.length>20){b.textContent='✓ Clé valide';b.className='badge bok';}else if(k.length){b.textContent='⚠ Format invalide';b.className='badge ber';}else{b.textContent='✗ Aucune clé';b.className='badge ber';}}
 function saveG(){const k=document.getElementById('gkey').value.trim(),m=document.getElementById('gmod').value,p=document.getElementById('gper').value;if(!k.startsWith('gsk_')){ntf('Paramètres','Clé invalide — doit commencer par gsk_');return;}ST.gkey=k;ST.gmod=m;ST.gper=p;localStorage.setItem('nx-gkey',k);localStorage.setItem('nx-gmod',m);localStorage.setItem('nx-gper',p);document.getElementById('gst').textContent='✓ Sauvegardée';document.getElementById('gst').className='badge bok';document.getElementById('aitag').textContent='ON';ntf('NEX AI','Clé Groq sauvegardée — '+m+' actif !');}
 function savePW(){const np=document.getElementById('npw').value,cp=document.getElementById('cpw').value;if(!np){ntf('Compte','Entre un nouveau mot de passe');return;}if(np!==cp){ntf('Compte','Mots de passe différents');return;}ST.pw=np;localStorage.setItem('nx-pw',np);document.getElementById('npw').value='';document.getElementById('cpw').value='';ntf('Compte','Mot de passe changé !');}
@@ -1186,7 +1255,7 @@ async function sendAI(){
     try{
       const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,messages:[{role:'system',content:persona},...aiH.slice(-10)],max_tokens:500,temperature:0.7})});
       const data=await r.json();
-      if(data.choices?.[0]){const rep=data.choices[0].message.content;aiH.push({role:'assistant',content:rep});td.querySelector('.ab2').innerHTML=rep.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>');}
+      if(data.choices?.[0]){const rep=data.choices[0].message.content;aiH.push({role:'assistant',content:rep});td.querySelector('.ab2').innerHTML=rep.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>');handleAIAction(rep);} 
       else throw new Error(data.error?.message||'Erreur API');
     }catch(e){td.querySelector('.ab2').innerHTML='<span style="color:#f59e0b">⚠ '+e.message+'</span>';}    
   }else{setTimeout(()=>{td.querySelector('.ab2').textContent=offR[offI%offR.length];offI++;},650);}
