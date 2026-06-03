@@ -263,6 +263,27 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Outfit',sans-serif
 .ib2:hover{background:rgba(99,102,241,.28);}
 .ib2.done{background:rgba(16,185,129,.09);border-color:rgba(16,185,129,.26);color:var(--g);cursor:default}
 
+/* ── GAMES HUB ── */
+#wgames{top:85px;left:110px;width:600px;height:500px;z-index:10;}
+.gbd{padding:11px;height:100%;display:flex;flex-direction:column;gap:8px;overflow-y:auto;}
+.games-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1;overflow-y:auto;}
+.game-card{display:flex;flex-direction:column;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px;cursor:pointer;transition:all .2s;gap:6px;}
+.game-card:hover{background:rgba(255,255,255,.06);border-color:rgba(99,102,241,.2);transform:translateY(-2px);}
+.game-icon{width:100%;height:100px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:bold;}
+.game-title{font-size:12px;font-weight:600;color:rgba(255,255,255,.9);}
+.game-cat{font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px;}
+.game-desc{font-size:10px;color:rgba(255,255,255,.5);line-height:1.4;margin:2px 0;}
+.game-rating{display:flex;align-items:center;gap:3px;font-size:10px;color:#fbbf24;}
+.game-btn{padding:4px 8px;border-radius:5px;font-size:10px;font-family:'Outfit',sans-serif;cursor:pointer;border:1px solid rgba(16,185,129,.37);background:rgba(16,185,129,.12);color:var(--g);transition:all .2s;}
+.game-btn:hover{background:rgba(16,185,129,.28);}
+.game-btn.inst{border-color:rgba(99,102,241,.37);background:rgba(99,102,241,.12);color:#818cf8;}
+.game-btn.inst:hover{background:rgba(99,102,241,.28);}
+.game-btn.done{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.35);cursor:default;opacity:.7;}
+#games-list::-webkit-scrollbar{width:4px;}
+#games-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px;}
+.games-list::-webkit-scrollbar{width:4px;}
+.games-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px;}
+
 /* ── NEX AI ── */
 #wa{top:62px;left:85px;width:380px;height:340px;z-index:10;}
 .aib{padding:12px;height:100%;display:flex;flex-direction:column;gap:9px;overflow-y:auto;}
@@ -438,6 +459,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Outfit',sans-serif
     <button class="sbb" title="Terminal" onclick="togW('wt')">$</button>
     <button class="sbb" title="Fichiers" onclick="openW('ws');nsTab('files')">▦</button>
     <button class="sbb" title="ZRAM" onclick="togW('wz')">⚡</button>
+    <button class="sbb" title="Games Hub" onclick="togW('wgames')">🎮</button>
     <button class="sbb" title="USB Manager" onclick="togW('wusb')">🔌</button>
     <div style="flex:1"></div>
     <button class="sbb" title="Paramètres" onclick="togW('wc')">⚙</button>
@@ -453,6 +475,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Outfit',sans-serif
       <div class="di" ondblclick="openW('ws');nsTab('files')"><div class="ib if2">▦</div><div class="il">Fichiers</div></div>
       <div class="di" ondblclick="openW('wz')"><div class="ib iz">⚡</div><div class="il">ZRAM</div></div>
       <div class="di" ondblclick="openW('wst2')"><div class="ib ist">◈</div><div class="il">NEX Store</div></div>
+      <div class="di" ondblclick="openW('wgames')"><div class="ib" style="background:linear-gradient(135deg,#ec4899,#8b5cf6)">🎮</div><div class="il">Games Hub</div></div>
       <div class="di" ondblclick="openW('wusb')"><div class="ib iusb">🔌</div><div class="il">USB Manager</div></div>
       <div class="di" ondblclick="newFile()"><div class="ib ic2">📄</div><div class="il">Éditeur</div></div>
       <div class="di" ondblclick="openW('wc')"><div class="ib it">⚙</div><div class="il">Paramètres</div></div>
@@ -468,6 +491,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Outfit',sans-serif
     <div class="ti" id="t-we" onclick="togW('we')"><span class="ic">📄</span><span class="lb">Éditeur</span></div>
     <div class="ti" id="t-wz" onclick="togW('wz')"><span class="ic">⚡</span><span class="lb">ZRAM</span></div>
     <div class="ti" id="t-wst2" onclick="togW('wst2')"><span class="ic">◈</span><span class="lb">NEX Store</span></div>
+    <div class="ti" id="t-wgames" onclick="togW('wgames')"><span class="ic">🎮</span><span class="lb">Games Hub</span></div>
     <div class="ti" id="t-wusb" onclick="togW('wusb')"><span class="ic">🔌</span><span class="lb">USB</span></div>
     <div class="ti" id="t-wc" onclick="togW('wc')"><span class="ic">⚙</span><span class="lb">Paramètres</span></div>
     <div class="tsp"></div>
@@ -607,10 +631,23 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Outfit',sans-serif
     <div class="wtb" id="tb-wst2"><div class="wbs"><div class="wb wc" onclick="closeW('wst2')">✕</div><div class="wb wm" onclick="closeW('wst2')">−</div><div class="wb wx">+</div></div><span class="wttl">◈ NEX Store</span></div>
     <div class="wb0"><div class="stbd">
       <input class="ssi" id="store-search" placeholder="Chercher un paquet NEX..." oninput="filterStore()">
-      <div class="sca"><div class="sc2 on" onclick="storeTab('all',this)">Tous</div><div class="sc2" onclick="storeTab('sys',this)">Système</div><div class="sc2" onclick="storeTab('ia',this)">IA</div><div class="sc2" onclick="storeTab('dev',this)">Dev</div><div class="sc2" onclick="storeTab('usb',this)">USB</div></div>
+      <div class="sca"><div class="sc2 on" onclick="storeTab('all',this)">Tous</div><div class="sc2" onclick="storeTab('sys',this)">Système</div><div class="sc2" onclick="storeTab('ia',this)">IA</div><div class="sc2" onclick="storeTab('dev',this)">Dev</div><div class="sc2" onclick="storeTab('games',this)">Jeux</div><div class="sc2" onclick="storeTab('usb',this)">USB</div></div>
       <div class="pl" id="store-list"></div>
     </div></div>
     <div class="resizer" id="r-wst2"></div>
+  </div>
+
+  <!-- GAMES HUB -->
+  <div class="win" id="wgames">
+    <div class="wtb" id="tb-wgames"><div class="wbs"><div class="wb wc" onclick="closeW('wgames')">✕</div><div class="wb wm" onclick="closeW('wgames')">−</div><div class="wb wx" onclick="maxWin('wgames')">+</div></div><span class="wttl">🎮 Games Hub — Jeux & Apps</span></div>
+    <div class="wb0">
+      <div class="gbd">
+        <input class="ssi" id="games-search" placeholder="Chercher un jeu..." oninput="filterGames()">
+        <div class="sca" id="games-cats"><div class="sc2 on" onclick="gamesTab('all',this)">Tous</div><div class="sc2" onclick="gamesTab('emulators',this)">Émulateurs</div><div class="sc2" onclick="gamesTab('casual',this)">Casual</div><div class="sc2" onclick="gamesTab('action',this)">Action/Adventure</div><div class="sc2" onclick="gamesTab('indie',this)">Indie</div><div class="sc2" onclick="gamesTab('tools',this)">Tools</div></div>
+        <div class="games-list" id="games-list"></div>
+      </div>
+    </div>
+    <div class="resizer" id="r-wgames"></div>
   </div>
 
   <!-- NEX AI -->
@@ -864,7 +901,7 @@ let dsi=false;
 function initDS(){
   if(dsi)return;dsi=true;
   updClk();setInterval(updClk,15000);
-  renderF(VFS);renderStore();
+  renderF(VFS);renderStore();renderGames();
   trmPrint('<span class="to">NEXOS Terminal v0.2 · Live USB Edition</span>');
   trmPrint('<span class="to">Tape <span class="thl">help</span> pour la liste des commandes</span>');
   trmPrint('<span style="color:rgba(16,185,129,.5)">🔌 Session live — rien n\'est installé sur ce PC</span>');
@@ -889,7 +926,7 @@ function togUserMenu(){
 
 // ══ WINDOW MANAGER ══
 let zT=10;
-const WINS=['ws','we','wt','wa','wz','wst2','wc','wnx','wusb'];
+const WINS=['ws','we','wt','wa','wz','wst2','wgames','wc','wnx','wusb'];
 function focW(id){zT++;const e=document.getElementById(id);if(e)e.style.zIndex=zT;}
 function openW(id){const e=document.getElementById(id);if(!e)return;e.classList.add('op');focW(id);const t=document.getElementById('t-'+id);if(t)t.classList.add('on');}
 function closeW(id){const e=document.getElementById(id);if(e)e.classList.remove('op');const t=document.getElementById('t-'+id);if(t)t.classList.remove('on');}
@@ -1102,7 +1139,31 @@ const PKGS=[
   {n:'nex-usb-encrypt',d:'Chiffrement AES-256 USB',v:'1.0.0',cat:'usb',ic:'🔒',col:'linear-gradient(135deg,#6366f1,#8b5cf6)',installed:false},
   {n:'nex-persist-mgr',d:'Gestion partition persistante',v:'1.2.1',cat:'usb',ic:'🔌',col:'linear-gradient(135deg,#059669,#0d9488)',installed:true},
 ];
-let storeFilter='all';
+
+// ══ GAMES HUB ══
+const GAMES=[
+  {t:'RetroArch',d:'Multi-émulateur rétro (NES, SNES, Genesis)',c:'emulators',ic:'👾',col:'linear-gradient(135deg,#db2777,#f43f5e)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'PCSX2',d:'Émulateur PlayStation 2',c:'emulators',ic:'🎮',col:'linear-gradient(135deg,#0891b2,#06b6d4)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'Dolphin',d:'Émulateur Wii & GameCube',c:'emulators',ic:'🐬',col:'linear-gradient(135deg,#4f46e5,#7c3aed)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'Citra',d:'Émulateur Nintendo 3DS',c:'emulators',ic:'📱',col:'linear-gradient(135deg,#ec4899,#f43f5e)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'SuperTuxKart',d:'Jeu de course 3D gratuit',c:'casual',ic:'🏎️',col:'linear-gradient(135deg,#10b981,#34d399)',rating:'⭐⭐⭐⭐',inst:true},
+  {t:'Tuxracer',d:'Jeu de ski amusant pour Linux',c:'casual',ic:'⛷️',col:'linear-gradient(135deg,#3b82f6,#60a5fa)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'Flightgear',d:'Simulateur de vol réaliste',c:'casual',ic:'✈️',col:'linear-gradient(135deg,#f59e0b,#fbbf24)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'Minetest',d:'Sandbox creatif inspiré Minecraft',c:'casual',ic:'⛏️',col:'linear-gradient(135deg,#059669,#10b981)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'0 A.D.',d:'Jeu stratégie temps réel gratuit',c:'indie',ic:'⚔️',col:'linear-gradient(135deg,#7c3aed,#a78bfa)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'Veloren',d:'RPG multijoueur voxel',c:'indie',ic:'🗻',col:'linear-gradient(135deg,#d97706,#f97316)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'Blender',d:'Suite 3D complète (modeling, animation)',c:'tools',ic:'🎨',col:'linear-gradient(135deg,#ea580c,#f97316)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'GIMP',d:'Éditeur d\'images puissant',c:'tools',ic:'🖼️',col:'linear-gradient(135deg,#6b21a8,#7c3aed)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'OBS Studio',d:'Enregistreur d\'écran / Streaming',c:'tools',ic:'📹',col:'linear-gradient(135deg,#0ea5e9,#06b6d4)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'Inkscape',d:'Éditeur graphique vectoriel',c:'tools',ic:'✏️',col:'linear-gradient(135deg,#f59e0b,#d97706)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'Audacity',d:'Éditeur audio professionnel',c:'tools',ic:'🎵',col:'linear-gradient(135deg,#3b82f6,#1e40af)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'Krita',d:'Application dessin numérique',c:'tools',ic:'🎭',col:'linear-gradient(135deg,#db2777,#be185d)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'OpenRCT2',d:'Jeu gestion parc d\'attractions',c:'indie',ic:'🎡',col:'linear-gradient(135deg,#10b981,#059669)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'Godot Engine',d:'Moteur de jeu open-source',c:'tools',ic:'🎮',col:'linear-gradient(135deg,#4f46e5,#6366f1)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'Valve Games',d:'Portal, Half-Life 2, Team Fortress 2 (Steam)',c:'action',ic:'🎯',col:'linear-gradient(135deg,#1f2937,#374151)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'Lutris',d:'Gestionnaire de jeux multi-plateformes',c:'tools',ic:'🎪',col:'linear-gradient(135deg,#fbbf24,#f59e0b)',rating:'⭐⭐⭐⭐',inst:false},
+];
+let gamesFilter='all';
 function renderStore(){
   const q=document.getElementById('store-search')?.value.toLowerCase()||'';
   let list=PKGS;
@@ -1113,6 +1174,18 @@ function renderStore(){
 function storeTab(t,el){storeFilter=t;document.querySelectorAll('.sc2').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderStore();}
 function filterStore(){renderStore();}
 function instP(i){const p=PKGS[i];if(p.installed)return;ntf('NEX Store','Installation de '+p.n+'...');installedPkgs.push(p.n);setTimeout(()=>{p.installed=true;renderStore();ntf('NEX Store',p.n+' installé sur USB !');},1200);}
+
+// ══ GAMES FUNCTIONS ══
+function renderGames(){
+  const q=document.getElementById('games-search')?.value.toLowerCase()||'';
+  let list=GAMES;
+  if(gamesFilter!=='all')list=list.filter(g=>g.c===gamesFilter);
+  if(q)list=list.filter(g=>g.t.toLowerCase().includes(q)||g.d.toLowerCase().includes(q));
+  document.getElementById('games-list').innerHTML=list.map((g,i)=>`<div class="game-card" ondblclick="instGame(${GAMES.indexOf(g)})"><div class="game-icon" style="background:${g.col}">${g.ic}</div><div class="game-title">${g.t}</div><div class="game-cat">${g.c==='emulators'?'Émulateur':g.c==='casual'?'Casual':g.c==='indie'?'Indie':g.c==='action'?'Action':g.c==='tools'?'Outil':'Jeu'}</div><div class="game-desc">${g.d}</div><div class="game-rating">${g.rating}</div><button class="game-btn ${g.c==='tools'?'inst':''} ${g.inst?'done':''}" onclick="instGame(${GAMES.indexOf(g)})">${g.inst?'✓ Installé':g.c==='tools'?'Ouvrir':'Jouer'}</button></div>`).join('');
+}
+function gamesTab(t,el){gamesFilter=t;document.querySelectorAll('#games-cats .sc2').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderGames();}
+function filterGames(){renderGames();}
+function instGame(i){const g=GAMES[i];if(g.inst)return;ntf('Games Hub','Lancement de '+g.t+'...');setTimeout(()=>{g.inst=true;renderGames();ntf('Games Hub',g.t+' lancé !');window.open('https://'+g.t.toLowerCase().replace(/\s+/g,'-')+'.com','_blank');},400);}
 
 // ══ PARAMÈTRES ══
 function cfgNav(s,el){document.querySelectorAll('.cfgni').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.cfgs').forEach(x=>x.classList.remove('on'));el.classList.add('on');document.getElementById('cfg-'+s).classList.add('on');}

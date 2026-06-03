@@ -14,7 +14,7 @@ lb config \
   --distribution bookworm \
   --architecture amd64 \
   --binary-images iso-hybrid \
-  --packages-lists nexos \
+  --package-lists nexos \
   --apt-indices true \
   --debian-installer false \
   --bootappend-live "boot=live components persistence"
