@@ -13,6 +13,7 @@ chmod +x config/includes.chroot/usr/local/bin/nexos-launch.sh
 lb config \
   --distribution jammy \
   --architecture amd64 \
+  --archive-areas "main universe multiverse" \
   --binary-images iso-hybrid \
   --apt-indices true \
   --debian-installer false \
