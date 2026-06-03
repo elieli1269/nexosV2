@@ -18,6 +18,6 @@ lb config \
   --debian-installer false \
   --bootappend-live "boot=live components persistence"
 
-lb build
+sudo lb build
 
 echo "Build complete: $(pwd)/live-image-amd64.hybrid.iso"

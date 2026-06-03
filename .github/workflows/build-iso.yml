@@ -24,6 +24,11 @@ jobs:
           sudo apt update
           sudo apt install -y live-build debootstrap xorriso syslinux-utils isolinux rsync genisoimage squashfs-tools
       
+      - name: Configure sudo for live-build
+        run: |
+          sudo usermod -aG sudo $USER || true
+          sudo -v
+      
       - name: Prepare & Build NEXOS ISO (debug enabled)
         run: |
           set -euxo pipefail
