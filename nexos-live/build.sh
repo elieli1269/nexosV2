@@ -11,7 +11,7 @@ cp -f nexos-launch.sh config/includes.chroot/usr/local/bin/nexos-launch.sh
 chmod +x config/includes.chroot/usr/local/bin/nexos-launch.sh
 
 lb config \
-  --distribution bookworm \
+  --distribution jammy \
   --architecture amd64 \
   --binary-images iso-hybrid \
   --apt-indices true \
