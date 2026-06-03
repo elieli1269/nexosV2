@@ -42,17 +42,42 @@ jobs:
           timeout 3600 bash -x ./build.sh 2>&1 | tee build.log || true
           tail -n 300 build.log || true
       
+      - name: Locate ISO artifact
+        id: locate_iso
+        run: |
+          set -eux
+          cd nexos-live || exit 2
+          # find the first hybrid ISO produced by live-build
+          find . -type f -name '*hybrid.iso' -print | tee iso_list.txt || true
+          ISO_REL=$(head -n1 iso_list.txt || true)
+          if [ -n "$ISO_REL" ]; then
+            ISO_ABS="$PWD/$ISO_REL"
+            echo "ISO_PATH=$ISO_ABS" >> $GITHUB_ENV
+            echo "Found ISO: $ISO_ABS"
+          else
+            echo "No ISO found in nexos-live"
+          fi
+
       - name: Upload ISO artifact
+        if: env.ISO_PATH != ''
         uses: actions/upload-artifact@v4
         with:
           name: nexos-iso
-          path: nexos-live/live-image-amd64.hybrid.iso
+          path: ${{ env.ISO_PATH }}
           retention-days: 30
-      
+
+      - name: Upload build log when no ISO
+        if: env.ISO_PATH == ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: nexos-live/build.log
+          retention-days: 7
+
       - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') && env.ISO_PATH != ''
         uses: softprops/action-gh-release@v1
         with:
-          files: nexos-live/live-image-amd64.hybrid.iso
+          files: ${{ env.ISO_PATH }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
