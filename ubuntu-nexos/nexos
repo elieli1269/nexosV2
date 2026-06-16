@@ -1,0 +1,203 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+UI_SRC="$REPO_ROOT/nexos-live/index.html"
+INSTALL_ROOT="/opt/nexos"
+UI_DST="$INSTALL_ROOT/index.html"
+LAUNCHER="/usr/local/bin/nexos-launch"
+DESKTOP="/usr/share/applications/nexos.desktop"
+DISABLED_DESKTOP="/usr/share/applications/nexos.desktop.disabled"
+AUTOSTART_FILE="/etc/xdg/autostart/nexos-autostart.desktop"
+AUTOSTART_DISABLED="/etc/xdg/autostart/nexos-autostart.desktop.disabled"
+MARKER_DIR="/var/lib/nexos"
+
+log() {
+  echo "[NEXOS] $*"
+}
+
+usage() {
+  cat <<EOF
+Usage: sudo $0 <command>
+Commands:
+  install   Install Nexos as a layer on Ubuntu
+  enable    Re-enable Nexos after disable
+  disable   Disable Nexos without removing files
+  uninstall Remove Nexos and all Nexos files
+  status    Show the current Nexos state
+EOF
+  exit 1
+}
+
+require_root() {
+  if [[ $(id -u) -ne 0 ]]; then
+    echo "This command must be run as root. Use sudo."
+    exit 1
+  fi
+}
+
+assert_source() {
+  if [[ ! -f "$UI_SRC" ]]; then
+    echo "Source UI file not found: $UI_SRC"
+    echo "Clone or extract the repository so nexos-live/index.html is available."
+    exit 1
+  fi
+}
+
+install_nexos() {
+  require_root
+  assert_source
+
+  log "Installing Nexos overlay..."
+  mkdir -p "$INSTALL_ROOT"
+  cp -f "$UI_SRC" "$UI_DST"
+
+  cat > "$LAUNCHER" <<'EOF'
+#!/usr/bin/env bash
+set -e
+
+XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+export XDG_RUNTIME_DIR
+
+if [[ -n "$XDG_SESSION_TYPE" && "$XDG_SESSION_TYPE" == "wayland" ]]; then
+  if command -v chromium >/dev/null 2>&1; then
+    exec chromium --ozone-platform=wayland --no-first-run --disable-translate --disable-infobars --kiosk "file:///opt/nexos/index.html"
+  elif command -v google-chrome >/dev/null 2>&1; then
+    exec google-chrome --ozone-platform=wayland --no-first-run --disable-translate --disable-infobars --kiosk "file:///opt/nexos/index.html"
+  elif command -v firefox >/dev/null 2>&1; then
+    MOZ_ENABLE_WAYLAND=1 exec firefox --kiosk "file:///opt/nexos/index.html"
+  else
+    exec x-www-browser "file:///opt/nexos/index.html"
+  fi
+else
+  if command -v chromium >/dev/null 2>&1; then
+    exec chromium --no-first-run --disable-translate --disable-infobars --kiosk "file:///opt/nexos/index.html"
+  elif command -v google-chrome >/dev/null 2>&1; then
+    exec google-chrome --no-first-run --disable-translate --disable-infobars --kiosk "file:///opt/nexos/index.html"
+  elif command -v firefox >/dev/null 2>&1; then
+    exec firefox --kiosk "file:///opt/nexos/index.html"
+  else
+    exec x-www-browser "file:///opt/nexos/index.html"
+  fi
+fi
+EOF
+
+  chmod +x "$LAUNCHER"
+
+  cat > "$DESKTOP" <<EOF
+[Desktop Entry]
+Name=NEXOS
+Comment=NEXOS overlay interface
+Exec=$LAUNCHER
+Terminal=false
+Type=Application
+Categories=Utility;
+Keywords=workspace;overlay;nexos;
+EOF
+
+  cat > "$AUTOSTART_FILE" <<EOF
+[Desktop Entry]
+Type=Application
+Name=NEXOS Autostart
+Exec=$LAUNCHER
+X-GNOME-Autostart-enabled=true
+NoDisplay=true
+Hidden=false
+EOF
+
+  mkdir -p "$MARKER_DIR"
+  touch "$MARKER_DIR/installed"
+
+  log "Nexos installed successfully."
+  log "Launch Nexos from the application menu or run: $LAUNCHER"
+  log "Autostart is enabled by default. To disable it without uninstalling, run: sudo $0 disable"
+}
+
+enable_nexos() {
+  require_root
+  local restored=false
+
+  if [[ -f "$AUTOSTART_DISABLED" ]]; then
+    mv "$AUTOSTART_DISABLED" "$AUTOSTART_FILE"
+    restored=true
+  fi
+  if [[ -f "$DISABLED_DESKTOP" ]]; then
+    mv "$DISABLED_DESKTOP" "$DESKTOP"
+    restored=true
+  fi
+
+  if [[ "$restored" == true ]]; then
+    log "Nexos enabled again."
+  elif [[ -f "$DESKTOP" || -f "$AUTOSTART_FILE" ]]; then
+    log "Nexos is already enabled."
+  else
+    log "Nexos is not installed. Run sudo $0 install first."
+    exit 1
+  fi
+}
+
+disable_nexos() {
+  require_root
+  local changed=false
+
+  if [[ -f "$AUTOSTART_FILE" ]]; then
+    mv "$AUTOSTART_FILE" "$AUTOSTART_DISABLED"
+    changed=true
+  fi
+  if [[ -f "$DESKTOP" ]]; then
+    mv "$DESKTOP" "$DISABLED_DESKTOP"
+    changed=true
+  fi
+
+  if [[ "$changed" == true ]]; then
+    log "Nexos disabled. Autostart is off and the app launcher is hidden."
+  elif [[ -f "$DISABLED_DESKTOP" || -f "$AUTOSTART_DISABLED" ]]; then
+    log "Nexos is already disabled."
+  else
+    log "Nexos is not installed. Nothing to disable."
+    exit 1
+  fi
+}
+
+uninstall_nexos() {
+  require_root
+  log "Uninstalling Nexos and removing Nexos files..."
+  rm -f "$LAUNCHER" "$DESKTOP" "$DISABLED_DESKTOP" "$AUTOSTART_FILE" "$AUTOSTART_DISABLED"
+  rm -rf "$INSTALL_ROOT" "$MARKER_DIR"
+  log "Nexos removed. The Ubuntu desktop is unchanged."
+}
+
+status() {
+  if [[ -f "$DESKTOP" || -f "$AUTOSTART_FILE" ]]; then
+    echo "Nexos is installed and enabled."
+  elif [[ -f "$DISABLED_DESKTOP" || -f "$AUTOSTART_DISABLED" ]]; then
+    echo "Nexos is installed but disabled."
+  else
+    echo "Nexos is not installed."
+  fi
+}
+
+if [[ $# -ne 1 ]]; then
+  usage
+fi
+
+case "$1" in
+  install)
+    install_nexos
+    ;;
+  enable)
+    enable_nexos
+    ;;
+  disable)
+    disable_nexos
+    ;;
+  uninstall)
+    uninstall_nexos
+    ;;
+  status)
+    status
+    ;;
+  *)
+    usage
+    ;;
+esac

@@ -1,0 +1,1 @@
+# Aucun paquet externe requis pour le backend Python (utilise only stdlib)

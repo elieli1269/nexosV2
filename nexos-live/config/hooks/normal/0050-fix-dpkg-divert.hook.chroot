@@ -1,0 +1,11 @@
+#!/bin/bash
+# Fix dpkg-divert conflict with start-stop-daemon
+set -e
+
+# Remove conflicting divert if it exists
+if dpkg-divert --list /usr/sbin/start-stop-daemon 2>/dev/null | grep -q "/usr/sbin/start-stop-daemon"; then
+    dpkg-divert --remove --rename /usr/sbin/start-stop-daemon || true
+fi
+
+# Ensure clean state
+rm -f /usr/sbin/start-stop-daemon.distrib
