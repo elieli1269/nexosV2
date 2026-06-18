@@ -74,7 +74,10 @@ def find_app_icon(app_name):
                                 with open(icon_path, 'rb') as f:
                                     icon_data = f.read()
                                     if len(icon_data) < 500000:  # Max 500KB
-                                        return f"data:image/png;base64,{base64.b64encode(icon_data).decode()}"
+                                        # Determine MIME type
+                                        ext = file.lower().split('.')[-1]
+                                        mime_type = 'image/png' if ext == 'png' else 'image/svg+xml' if ext == 'svg' else 'image/jpeg'
+                                        return f"data:{mime_type};base64,{base64.b64encode(icon_data).decode()}"
                             except:
                                 pass
             # Don't go too deep
