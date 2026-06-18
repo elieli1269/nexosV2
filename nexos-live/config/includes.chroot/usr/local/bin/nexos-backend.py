@@ -7,11 +7,19 @@ import socketserver
 import subprocess
 from urllib.parse import urlparse, parse_qs
 from pathlib import Path
+import base64
 
 PORT = 9876
 BACKEND_PATH = "/usr/local/bin/nexos"
 HOME = os.path.expanduser("~")
 SEARCH_PATHS = [HOME, "/usr/share", "/opt", "/home"]
+ICON_PATHS = [
+    "/usr/share/pixmaps",
+    "/usr/share/icons/hicolor",
+    "/usr/share/icons/ubuntu",
+    "/usr/local/share/pixmaps",
+    f"{HOME}/.local/share/icons",
+]
 
 def detect_zram_status():
     """Detect if ZRAM is installed and running"""
@@ -32,6 +40,48 @@ def detect_zram_status():
         pass
     
     return {"installed": False, "status": "inactive", "info": "ZRAM not detected"}
+
+
+def find_app_icon(app_name):
+    """Find and return base64-encoded icon for an app"""
+    app_lower = app_name.lower().replace(' ', '').replace('.', '')
+    
+    # Common icon names mapping
+    icon_mappings = {
+        'chrome': 'google-chrome',
+        'chromium': 'chromium-browser',
+        'firefox': 'firefox',
+        'vscode': 'code',
+        'vlc': 'vlc',
+        'libreoffice': 'libreoffice-writer',
+    }
+    
+    search_names = [icon_mappings.get(app_lower, app_lower), app_lower, app_name.lower()]
+    
+    for icon_dir in ICON_PATHS:
+        if not os.path.isdir(icon_dir):
+            continue
+        
+        # Search for icons recursively
+        for root, dirs, files in os.walk(icon_dir):
+            for file in files:
+                if file.endswith(('.png', '.svg', '.jpg')):
+                    file_lower = file.lower().replace('.png', '').replace('.svg', '').replace('.jpg', '')
+                    for name in search_names:
+                        if name in file_lower or file_lower in name:
+                            icon_path = os.path.join(root, file)
+                            try:
+                                with open(icon_path, 'rb') as f:
+                                    icon_data = f.read()
+                                    if len(icon_data) < 500000:  # Max 500KB
+                                        return f"data:image/png;base64,{base64.b64encode(icon_data).decode()}"
+                            except:
+                                pass
+            # Don't go too deep
+            if root.count(os.sep) - icon_dir.count(os.sep) > 4:
+                break
+    
+    return None
 
 
 def list_pc_apps():
@@ -233,8 +283,23 @@ class NexosHandler(http.server.SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps({"apps": list_pc_apps()}).encode("utf-8"))
+            apps = list_pc_apps()
+            # Add icon data for each app
+            for app in apps:
+                icon = find_app_icon(app["name"])
+                app["icon"] = icon
+            self.wfile.write(json.dumps({"apps": apps}).encode("utf-8"))
             return
+        
+        if parsed.path == "/icon":
+            app_name = query.get("app", [""])[0]
+            if app_name:
+                icon = find_app_icon(app_name)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"icon": icon, "app": app_name}).encode("utf-8"))
+                return
         
         if parsed.path == "/files":
             search_path = query.get("path", [HOME])[0]
