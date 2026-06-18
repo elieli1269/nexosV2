@@ -199,6 +199,14 @@ def build_apps_index():
             "desc": "Moteur de recherche intégré",
             "keywords": ["search", "find", "query"]
         },
+        {
+            "name": "MoodSync", 
+            "category": "mood", 
+            "icon": "🎵", 
+            "desc": "Plateforme de synchronisation d'ambiance musicale",
+            "keywords": ["mood", "music", "sync", "ambient", "playlist"],
+            "url": "https://moodsync.alwaysdata.net"
+        },
     ]
     
     # Extended categorization with semantic keywords

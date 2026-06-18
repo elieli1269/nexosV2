@@ -1083,6 +1083,12 @@ function nfRefresh(){
   nfLoadFiles(NF_CURRENT_PATH);
 }
 
+function nfOpenApp(app){
+  if(app.url){
+    window.open(app.url, '_blank');
+  }
+}
+
 function nfRenderAppsTab(){
   const list = document.getElementById('nf-apps-list');
   let html = '';
@@ -1090,9 +1096,11 @@ function nfRenderAppsTab(){
   // NEX Apps
   if(APPS_INDEX.nex && APPS_INDEX.nex.length){
     html += '<div class="nf-cat">NEX Apps — Intégré</div>';
-    html += APPS_INDEX.nex.map(app => 
-      `<div class="nf-item" title="${app.desc}">${app.icon}<span class="nf-name">${app.name}</span><span class="nf-meta">${app.category}</span></div>`
-    ).join('');
+    html += APPS_INDEX.nex.map((app, i) => {
+      const onclick = app.url ? `onclick="nfOpenApp(APPS_INDEX.nex[${i}])"` : '';
+      const style = app.url ? 'cursor:pointer;opacity:.9;' : '';
+      return `<div class="nf-item" ${onclick} style="${style}" title="${app.desc}">${app.icon}<span class="nf-name">${app.name}</span><span class="nf-meta">${app.category}</span></div>`;
+    }).join('');
   }
   
   // System Apps by category
