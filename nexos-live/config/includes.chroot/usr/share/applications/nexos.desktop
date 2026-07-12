@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=NEXOS UI
+Comment=Interface NEXOS Live USB
+Exec=/usr/local/bin/nexos-launch.sh
+Icon=applications-internet
+Terminal=false
+Categories=System;Utility;
+StartupNotify=false

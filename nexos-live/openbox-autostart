@@ -1,0 +1,3 @@
+#!/bin/sh
+# Démarrage automatique de l'interface NEXOS en mode kiosque
+/usr/local/bin/nexos-launch.sh

@@ -1,0 +1,1350 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>NEXOS v0.2</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--i:#6366f1;--g:#10b981;--bg:#070c18;--s:rgba(12,16,28,0.99);--b:rgba(255,255,255,0.07);--t:rgba(255,255,255,0.85);--m:rgba(255,255,255,0.38);}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t);}
+
+/* ── SCREENS ── */
+.screen{position:fixed;inset:0;z-index:800;display:none;}
+.screen.act{display:flex;}
+
+/* BOOT */
+#boot{background:var(--bg);flex-direction:column;align-items:center;justify-content:center;gap:26px;}
+#boot::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 55% 55% at 50% 50%,rgba(99,102,241,0.09) 0%,transparent 70%);pointer-events:none;}
+.blogo{font-size:58px;font-weight:700;letter-spacing:4px;background:linear-gradient(135deg,#6366f1,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:li .9s ease;}
+@keyframes li{from{opacity:0;transform:scale(.82)}to{opacity:1;transform:scale(1)}}
+.bsub{font-size:11px;color:rgba(255,255,255,.25);letter-spacing:3px;text-transform:uppercase;}
+.busb{font-size:11px;color:rgba(16,185,129,.6);letter-spacing:2px;display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.18);}
+.busb-dot{width:6px;height:6px;border-radius:50%;background:var(--g);animation:pulse 1.4s infinite;}
+.bbarw{width:220px;height:2px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
+.bbar{height:100%;background:linear-gradient(90deg,var(--i),var(--g));width:0;transition:width .22s ease;}
+.bmsg{font-size:11px;color:rgba(255,255,255,.2);font-family:'JetBrains Mono',monospace;min-height:15px;}
+.bver{position:absolute;bottom:20px;font-size:10px;color:rgba(255,255,255,.13);}
+.blive{position:absolute;top:20px;right:24px;font-size:10px;color:rgba(99,102,241,.6);letter-spacing:2px;border:1px solid rgba(99,102,241,.2);padding:3px 9px;border-radius:4px;}
+
+/* LOGIN */
+#login{flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse 55% 55% at 30% 40%,rgba(99,102,241,0.14) 0%,transparent 65%),radial-gradient(ellipse 45% 45% at 75% 70%,rgba(16,185,129,0.08) 0%,transparent 60%),var(--bg);}
+#login::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.016) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;}
+.ltm{font-size:52px;font-weight:300;color:rgba(255,255,255,.72);letter-spacing:2px;position:absolute;top:52px;}
+.ldt{font-size:13px;color:rgba(255,255,255,.28);position:absolute;top:118px;}
+.lbox{background:rgba(12,16,28,.94);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:36px 40px;display:flex;flex-direction:column;align-items:center;gap:16px;width:320px;box-shadow:0 30px 75px rgba(0,0,0,.75);animation:bi .42s ease;position:relative;z-index:1;}
+@keyframes bi{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.lav{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,rgba(99,102,241,.26),rgba(16,185,129,.16));border:2px solid rgba(99,102,241,.3);display:flex;align-items:center;justify-content:center;font-size:26px;}
+.lname{font-size:15px;font-weight:500;color:rgba(255,255,255,.87);}
+.llive{font-size:10px;color:rgba(16,185,129,.7);background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);padding:2px 8px;border-radius:10px;letter-spacing:1px;}
+.linp{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 16px;color:white;font-size:14px;font-family:'Outfit',sans-serif;outline:none;text-align:center;letter-spacing:4px;transition:border-color .2s;}
+.linp:focus{border-color:rgba(99,102,241,.52);}
+.linp::placeholder{letter-spacing:1px;font-size:12px;color:rgba(255,255,255,.18);}
+.ldots{display:flex;gap:8px;}
+.ldot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.1);transition:background .15s;}
+.ldot.on{background:var(--i);}
+.lbtn{width:100%;padding:11px;border-radius:10px;background:linear-gradient(135deg,rgba(99,102,241,.46),rgba(16,185,129,.26));border:1px solid rgba(99,102,241,.46);color:white;font-size:14px;font-family:'Outfit',sans-serif;font-weight:500;cursor:pointer;transition:filter .2s;}
+.lbtn:hover{filter:brightness(1.18);}
+.lerr{font-size:12px;color:#ef4444;min-height:15px;}
+.ltip{font-size:11px;color:rgba(255,255,255,.18);text-align:center;}
+
+/* ── DESKTOP ── */
+#ds{position:fixed;inset:0;display:none;z-index:1;}
+#ds.act{display:block;}
+#wp{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 15% 60%,rgba(99,102,241,0.11) 0%,transparent 70%),radial-gradient(ellipse 50% 40% at 85% 15%,rgba(16,185,129,0.07) 0%,transparent 65%),var(--bg);}
+#gr{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.016) 1px,transparent 1px);background-size:48px 48px;}
+
+/* TOPBAR */
+#topbar{position:fixed;top:0;left:0;right:0;height:38px;background:rgba(7,12,24,.94);backdrop-filter:blur(20px);border-bottom:1px solid var(--b);display:flex;align-items:center;padding:0 16px;gap:12px;z-index:2000;user-select:none;}
+.logo{font-size:13px;font-weight:600;letter-spacing:1.2px;background:linear-gradient(135deg,#6366f1,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.start-btn{width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:rgba(255,255,255,.85);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.start-btn:hover{background:rgba(255,255,255,.1);}
+.tbsrch{flex:1;max-width:330px;margin:0 auto;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:22px;padding:5px 10px;display:flex;align-items:center;gap:7px;transition:all .2s;}
+.tbsrch:hover{background:rgba(255,255,255,.09);}
+.tbsrch span{font-size:12px;color:rgba(255,255,255,.26);}
+.tbsrch-input{flex:1;background:transparent;border:none;outline:none;color:white;font-size:12px;font-family:'Outfit',sans-serif;padding:7px 0;min-width:0;}
+.tbsrch-go{padding:6px 12px;border-radius:14px;background:linear-gradient(135deg,rgba(99,102,241,.5),rgba(16,185,129,.3));border:1px solid rgba(99,102,241,.5);color:white;font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;font-weight:500;flex-shrink:0;transition:filter .2s;}
+.tbsrch-go:hover{filter:brightness(1.15);}
+.topbar-engines{display:flex;align-items:center;gap:5px;margin-left:10px;}
+.topbar-engines .sbg{padding:4px 8px;font-size:11px;}
+.start-grid{display:grid;grid-template-columns:repeat(3,minmax(120px,1fr));gap:12px;padding:18px;}
+.start-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:all .18s;min-height:108px;justify-content:center;}
+.start-card:hover{background:rgba(255,255,255,.08);transform:translateY(-2px);}
+.sk{width:44px;height:44px;border-radius:14px;background:rgba(99,102,241,.18);display:flex;align-items:center;justify-content:center;font-size:18px;color:#818cf8;}
+.quiz-body{display:flex;flex-direction:column;gap:14px;}
+.quiz-body .cfgr{display:flex;flex-direction:column;gap:6px;}
+.quiz-body .cfgl{font-size:12px;color:rgba(255,255,255,.7);}
+.quiz-output{min-height:160px;padding:12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.9);white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:12px;overflow:auto;}
+.tbr{margin-left:auto;display:flex;align-items:center;gap:13px;}
+@media (max-width:1120px){#topbar{flex-wrap:wrap;justify-content:center;gap:10px;} .tbsrch{max-width:100%;order:2;} .topbar-engines{order:3;width:100%;justify-content:center;} .tbr{order:4;width:100%;justify-content:center;}.start-btn{order:1;}}
+@media (max-width:860px){#da{top:142px;} .ia{grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:12px;} #sb{width:52px;} #tkb{height:76px;}} 
+.aidot{width:8px;height:8px;border-radius:50%;background:var(--g);box-shadow:0 0 6px var(--g);animation:pulse 2.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.32}}
+.si{font-size:11px;color:var(--m);}
+.si b{color:rgba(99,102,241,.9);font-weight:500;}
+#clk{font-size:12px;font-weight:500;color:rgba(255,255,255,.74);}
+#zind{font-size:11px;color:var(--g);display:none;}
+.tbusr{font-size:11px;color:var(--m);cursor:pointer;display:flex;align-items:center;gap:5px;}
+.tbusr:hover{color:white;}
+.usb-badge{font-size:10px;color:rgba(16,185,129,.8);background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);padding:2px 7px;border-radius:10px;letter-spacing:.5px;cursor:pointer;transition:all .2s;}
+.usb-badge:hover{background:rgba(16,185,129,.15);}
+.live-badge{font-size:10px;color:rgba(239,184,68,.8);background:rgba(239,184,68,.07);border:1px solid rgba(239,184,68,.2);padding:2px 7px;border-radius:10px;letter-spacing:.5px;}
+
+/* DESKTOP AREA */
+#da{position:fixed;top:38px;left:0;right:64px;bottom:52px;z-index:1;}
+.ia{display:grid;grid-template-columns:repeat(4,86px);gap:18px;padding:18px;}
+.di{display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;user-select:none;transition:transform .15s;}
+.di:hover{transform:scale(1.07);}
+.di:hover .il{opacity:1;}
+.ib{width:52px;height:52px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:20px;transition:box-shadow .2s;}
+.di:hover .ib{box-shadow:0 6px 20px rgba(0,0,0,.55);}
+.il{font-size:10px;color:rgba(255,255,255,.8);text-align:center;opacity:.68;transition:opacity .15s;text-shadow:0 1px 5px rgba(0,0,0,.9);}
+.is{background:linear-gradient(135deg,#4f46e5,#7c3aed)}.ia2{background:linear-gradient(135deg,#059669,#0d9488)}.in{background:linear-gradient(135deg,#db2777,#9333ea)}.iz{background:linear-gradient(135deg,#0ea5e9,#6366f1)}.ist{background:linear-gradient(135deg,#7c3aed,#db2777)}.it{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}.if2{background:linear-gradient(135deg,#d97706,#b45309)}.ic2{background:linear-gradient(135deg,#374151,#1f2937);border:1px solid rgba(255,255,255,.1)}.iusb{background:linear-gradient(135deg,#0d9488,#0891b2)}.inexa{background:linear-gradient(135deg,#db2777,#f43f5e)}
+
+/* SIDEBAR */
+#sb{position:fixed;top:38px;right:0;bottom:52px;width:64px;background:rgba(7,12,24,.78);border-left:1px solid var(--b);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:5px;z-index:500;user-select:none;}
+.sbb{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .2s;color:rgba(255,255,255,.4);background:transparent;border:none;}
+.sbb:hover{background:rgba(255,255,255,.08);color:white;}
+.sbb.on{background:rgba(99,102,241,.2);color:#818cf8;}
+
+/* TASKBAR */
+#tkb{position:fixed;bottom:0;left:0;right:0;height:52px;background:rgba(7,12,24,.94);backdrop-filter:blur(20px);border-top:1px solid var(--b);display:flex;align-items:center;padding:0 13px;gap:5px;z-index:2000;overflow-x:auto;user-select:none;}
+.ti{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent;transition:all .17s;flex-shrink:0;}
+.ti:hover{background:rgba(255,255,255,.07);}
+.ti.on{background:rgba(99,102,241,.13);border-color:rgba(99,102,241,.28);}
+.ti .ic{font-size:13px;}.ti .lb{font-size:10px;color:var(--m);}
+.tsp{flex:1;}
+.nb{padding:5px 13px;border-radius:7px;background:rgba(99,102,241,.17);border:1px solid rgba(99,102,241,.35);color:#818cf8;font-size:11px;font-family:'Outfit',sans-serif;cursor:pointer;font-weight:500;flex-shrink:0;transition:all .2s;}
+.nb:hover{background:rgba(99,102,241,.3);}
+
+/* ── WINDOWS ── */
+.win{position:fixed;background:var(--s);border:1px solid var(--b);border-radius:13px;overflow:hidden;display:none;flex-direction:column;box-shadow:0 22px 65px rgba(0,0,0,.78);min-width:260px;min-height:160px;}
+.win.op{display:flex;}
+.win.focused{border-color:rgba(99,102,241,.2);}
+.wtb{height:37px;background:rgba(255,255,255,.028);border-bottom:1px solid var(--b);display:flex;align-items:center;padding:0 12px;gap:7px;flex-shrink:0;cursor:grab;user-select:none;}
+.wtb:active{cursor:grabbing;}
+.wbs{display:flex;gap:6px;align-items:center;}
+.wb{width:12px;height:12px;border-radius:50%;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:7px;color:transparent;transition:color .15s;}
+.wb:hover{color:rgba(0,0,0,.5);}
+.wc{background:#ef4444}.wm{background:#f59e0b}.wx{background:#10b981}
+.wttl{font-size:12px;color:rgba(255,255,255,.46);flex:1;margin-left:5px;}
+.wb0{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.resizer{position:absolute;bottom:0;right:0;width:16px;height:16px;cursor:se-resize;z-index:10;}
+.resizer::after{content:'';position:absolute;bottom:3px;right:3px;width:8px;height:8px;border-right:2px solid rgba(255,255,255,.2);border-bottom:2px solid rgba(255,255,255,.2);}
+
+/* ── NEXSEARCH ── */
+#ws{top:46px;left:55px;width:680px;height:500px;z-index:10;}
+.nsb{padding:9px 13px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--b);display:flex;align-items:center;gap:9px;flex-shrink:0;}
+.nsl{font-size:14px;font-weight:600;background:linear-gradient(135deg,#6366f1,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;flex-shrink:0;}
+.nsw{flex:1;display:flex;align-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(99,102,241,.32);border-radius:22px;padding:0 13px;gap:7px;transition:border-color .2s;}
+.nsw:focus-within{border-color:rgba(99,102,241,.68);}
+.nsi{flex:1;background:transparent;border:none;outline:none;color:white;font-size:13px;font-family:'Outfit',sans-serif;padding:9px 0;}
+.nsi::placeholder{color:rgba(255,255,255,.2);}
+.nsg{padding:6px 14px;border-radius:17px;background:linear-gradient(135deg,rgba(99,102,241,.5),rgba(16,185,129,.3));border:1px solid rgba(99,102,241,.5);color:white;font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;font-weight:500;flex-shrink:0;transition:filter .2s;}
+.nsg:hover{filter:brightness(1.2);}
+.nstabs{display:flex;padding:0 13px;border-bottom:1px solid var(--b);flex-shrink:0;}
+.nstb{padding:8px 12px;font-size:12px;color:var(--m);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:5px;user-select:none;}
+.nstb:hover{color:rgba(255,255,255,.7);}
+.nstb.on{color:#818cf8;border-bottom-color:var(--i);}
+.nd{width:5px;height:5px;border-radius:50%;background:currentColor;}
+.nsc{flex:1;overflow:hidden;position:relative;}
+.nst{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden;}
+.nst.on{display:flex;}
+.srcb{padding:6px 13px;display:flex;align-items:center;gap:7px;border-bottom:1px solid rgba(255,255,255,.04);flex-shrink:0;}
+.sbg{padding:3px 8px;border-radius:5px;font-size:11px;display:flex;align-items:center;gap:4px;cursor:pointer;transition:all .2s;border:1px solid transparent;}
+.sbg:hover{filter:brightness(1.3);}
+.sbg.g{background:rgba(66,133,244,.13);border-color:rgba(66,133,244,.25);color:#60a5fa}
+.sbg.b{background:rgba(0,120,212,.11);border-color:rgba(0,120,212,.22);color:#7dd3fc}
+.sbg.d{background:rgba(222,88,21,.11);border-color:rgba(222,88,21,.22);color:#fb923c}
+.sbg.sel{filter:brightness(1.5);box-shadow:0 0 7px currentColor;}
+.sd{width:5px;height:5px;border-radius:50%;background:currentColor;}
+#wsst{margin-left:auto;font-size:10px;color:rgba(255,255,255,.2);}
+.ifw{flex:1;position:relative;overflow:hidden;}
+#nshome{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;}
+.nshl{font-size:28px;font-weight:600;background:linear-gradient(135deg,#6366f1,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.nshs{font-size:12px;color:rgba(255,255,255,.28);}
+.nssugs{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
+.nssug{padding:5px 11px;border-radius:14px;font-size:11px;color:rgba(255,255,255,.46);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);cursor:pointer;transition:all .2s;}
+.nssug:hover{background:rgba(99,102,241,.17);color:#818cf8;border-color:rgba(99,102,241,.36);}
+#nsload{position:absolute;inset:0;background:var(--s);display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;}
+.sp{width:30px;height:30px;border-radius:50%;border:2px solid rgba(99,102,241,.17);border-top-color:var(--i);animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+#nsload p{font-size:12px;color:var(--m);}
+#nsif{width:100%;height:100%;border:none;display:none;}
+#nsfl{position:absolute;inset:0;overflow-y:auto;padding:13px;display:none;flex-direction:column;gap:9px;}
+.nab{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.17);border-radius:10px;padding:11px 13px;display:flex;gap:9px;}
+.nai{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#059669,#0d9488);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.nal{font-size:10px;color:var(--g);margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;}
+.nat{font-size:12px;color:rgba(255,255,255,.7);line-height:1.6;}
+.nsr{padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:8px;cursor:pointer;transition:all .15s;}
+.nsr:hover{background:rgba(99,102,241,.08);border-color:rgba(99,102,241,.19);}
+.nsrs{font-size:10px;color:rgba(99,102,241,.7);margin-bottom:2px;}
+.nsrt{font-size:12px;color:rgba(255,255,255,.84);font-weight:500;margin-bottom:3px;}
+.nsrd{font-size:11px;color:var(--m);line-height:1.45;}
+.ftb2{padding:7px 13px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--b);flex-shrink:0;}
+.fsr{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:5px 10px;color:white;font-size:12px;font-family:'Outfit',sans-serif;outline:none;}
+.fsr:focus{border-color:rgba(99,102,241,.36);}
+.ffb{padding:3px 8px;border-radius:5px;font-size:11px;cursor:pointer;border:1px solid rgba(255,255,255,.07);color:var(--m);background:transparent;transition:all .2s;font-family:'Outfit',sans-serif;}
+.ffb.on{background:rgba(99,102,241,.17);border-color:rgba(99,102,241,.36);color:#818cf8;}
+.fls{flex:1;overflow-y:auto;padding:8px 13px;display:flex;flex-direction:column;gap:4px;}
+.fi{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;cursor:pointer;transition:all .14s;border:1px solid transparent;}
+.fi:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.06);}
+.fi.sel{background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.25);}
+.fic{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.fd{background:rgba(66,133,244,.17)}.fc{background:rgba(99,102,241,.17)}.fn{background:rgba(139,92,246,.19);border:1px solid rgba(139,92,246,.26)}.fm{background:rgba(239,68,68,.15)}
+.fin{flex:1;min-width:0;}
+.fn2{font-size:11px;color:rgba(255,255,255,.82);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fp2{font-size:10px;color:rgba(255,255,255,.26);margin-top:1px;}
+.fm2{text-align:right;flex-shrink:0;font-size:10px;color:rgba(255,255,255,.26);}
+.hta{flex:1;overflow-y:auto;padding:9px 13px;display:flex;flex-direction:column;gap:4px;}
+.hs{font-size:10px;color:rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:1px;padding:3px 2px;margin-bottom:2px;}
+.hit{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;border:1px solid transparent;cursor:pointer;transition:all .14s;}
+.hit:hover{background:rgba(255,255,255,.04);}
+.hq{font-size:12px;color:rgba(255,255,255,.72);flex:1;}
+.hbg{font-size:10px;padding:2px 6px;border-radius:4px;}
+.hg{background:rgba(66,133,244,.13);color:#60a5fa}.hf{background:rgba(99,102,241,.13);color:#818cf8}
+.htm{font-size:10px;color:rgba(255,255,255,.2);}
+
+/* ── ÉDITEUR ── */
+#we{top:50px;left:120px;width:600px;height:460px;z-index:10;}
+.ed-toolbar{padding:6px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--b);flex-shrink:0;background:rgba(255,255,255,.02);}
+.ed-fname{font-size:12px;color:rgba(255,255,255,.6);font-family:'JetBrains Mono',monospace;flex:1;}
+.ed-lang{font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(99,102,241,.15);color:#818cf8;border:1px solid rgba(99,102,241,.3);}
+.ed-btn{padding:4px 10px;border-radius:6px;font-size:11px;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s;border:1px solid transparent;}
+.ed-save{background:rgba(16,185,129,.17);border-color:rgba(16,185,129,.35);color:var(--g);}
+.ed-save:hover{background:rgba(16,185,129,.3);}
+.ed-close2{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.28);color:#ef4444;}
+.ed-close2:hover{background:rgba(239,68,68,.25);}
+.ed-wrap{flex:1;display:flex;overflow:hidden;}
+.ed-lines{width:42px;background:rgba(0,0,0,.3);padding:12px 0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,.2);line-height:1.6;overflow:hidden;flex-shrink:0;padding-right:8px;}
+.ed-area{flex:1;background:transparent;border:none;outline:none;color:rgba(255,255,255,.88);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;padding:12px;resize:none;white-space:pre;}
+.ed-area::-webkit-scrollbar{width:5px;}
+.ed-area::-webkit-scrollbar-track{background:transparent;}
+.ed-area::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px;}
+.ed-status{padding:4px 12px;background:rgba(0,0,0,.3);display:flex;gap:14px;flex-shrink:0;border-top:1px solid var(--b);}
+.ed-st-item{font-size:10px;color:rgba(255,255,255,.3);font-family:'JetBrains Mono',monospace;}
+.ed-st-item b{color:rgba(99,102,241,.8);}
+
+/* ── TERMINAL ── */
+#wt{top:90px;left:130px;width:580px;height:340px;z-index:10;}
+.trm{background:#040810;padding:0;font-family:'JetBrains Mono',monospace;font-size:12.5px;height:100%;display:flex;flex-direction:column;}
+.trm-out{flex:1;overflow-y:auto;padding:12px 14px;line-height:1.6;}
+.trm-out::-webkit-scrollbar{width:4px;}
+.trm-out::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px;}
+.tl{margin-bottom:1px;}
+.tp{color:#818cf8}.tc{color:rgba(255,255,255,.86)}.to{color:rgba(255,255,255,.42)}.tok{color:#10b981}.tw{color:#f59e0b}.te{color:#ef4444}.thl{color:#60a5fa}
+.trm-inp-row{display:flex;align-items:center;gap:0;border-top:1px solid rgba(255,255,255,.05);padding:8px 14px;flex-shrink:0;}
+.trm-prompt-label{color:#818cf8;font-size:12.5px;font-family:'JetBrains Mono',monospace;white-space:nowrap;margin-right:6px;}
+.trm-inp{flex:1;background:transparent;border:none;outline:none;color:rgba(255,255,255,.9);font-family:'JetBrains Mono',monospace;font-size:12.5px;}
+.trm-inp::placeholder{color:rgba(255,255,255,.18);}
+
+/* ── ZRAM ── */
+#wz{top:58px;left:75px;width:430px;height:350px;z-index:10;}
+.zbd{padding:14px;height:100%;display:flex;flex-direction:column;gap:11px;overflow-y:auto;}
+.zr{display:flex;align-items:center;gap:9px;}
+.zba{padding:3px 10px;border-radius:18px;font-size:11px;font-weight:600;}
+.zba.on{background:rgba(16,185,129,.16);color:var(--g);border:1px solid rgba(16,185,129,.34)}.zba.off{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.25)}
+.ztg{margin-left:auto;padding:5px 13px;border-radius:7px;font-size:11px;font-family:'Outfit',sans-serif;cursor:pointer;font-weight:500;}
+.ztg.on{background:rgba(239,68,68,.16);color:#ef4444;border:1px solid rgba(239,68,68,.27)}.ztg.off{background:rgba(16,185,129,.16);color:var(--g);border:1px solid rgba(16,185,129,.34)}
+.zst2{font-size:10px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:1px;}
+.sg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
+.sc{background:rgba(255,255,255,.038);border:1px solid rgba(255,255,255,.06);border-radius:9px;padding:9px;}
+.sl{font-size:10px;color:rgba(255,255,255,.3);margin-bottom:3px;}.sv{font-size:15px;font-weight:600;}.ss{font-size:10px;color:rgba(255,255,255,.26);margin-top:2px;}
+.sb2{color:#60a5fa}.sp2{color:#a78bfa}.sg2{color:var(--g)}
+.mb{background:rgba(255,255,255,.05);border-radius:4px;height:5px;overflow:hidden;margin-top:4px;}
+.mb2{height:100%;border-radius:4px;transition:width .9s ease;}
+.al{display:flex;gap:5px;flex-wrap:wrap;}
+.ab{padding:3px 9px;border-radius:5px;font-size:11px;font-family:'Outfit',sans-serif;cursor:pointer;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:var(--m);transition:all .2s;}
+.ab.on{background:rgba(99,102,241,.2);border-color:rgba(99,102,241,.44);color:#818cf8}
+.dl{display:flex;flex-direction:column;gap:4px;}
+.dit{display:flex;align-items:center;gap:9px;padding:6px 9px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:7px;}
+.dn{font-size:11px;color:rgba(255,255,255,.78);font-weight:500;width:90px}.ds2{font-size:10px;color:var(--m);width:48px}
+.db{flex:1;background:rgba(255,255,255,.05);border-radius:3px;height:4px;}
+.db2{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--i),var(--g));}
+.dp{font-size:10px;color:var(--m);width:30px;text-align:right}
+.zb2{padding:6px 14px;border-radius:7px;background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.4);color:#818cf8;font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;font-weight:500;align-self:flex-start;}
+.zb2:hover{background:rgba(99,102,241,.34);}
+
+/* ── STORE ── */
+#wst2{top:68px;left:95px;width:400px;height:340px;z-index:10;}
+.stbd{padding:11px;height:100%;display:flex;flex-direction:column;gap:8px;}
+.ssi{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:6px 11px;color:white;font-size:12px;font-family:'Outfit',sans-serif;outline:none;width:100%;}
+.sca{display:flex;gap:4px;}
+.sc2{padding:3px 8px;border-radius:5px;font-size:11px;font-family:'Outfit',sans-serif;cursor:pointer;border:1px solid rgba(255,255,255,.07);color:var(--m);background:transparent;transition:all .2s;}
+.sc2.on{background:rgba(99,102,241,.17);border-color:rgba(99,102,241,.36);color:#818cf8}
+.pl{display:flex;flex-direction:column;gap:6px;flex:1;overflow-y:auto;}
+.pi{display:flex;align-items:center;gap:9px;padding:8px 10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:9px;}
+.pic2{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.pin{flex:1;}.pn{font-size:12px;color:rgba(255,255,255,.83);font-weight:500}.pd{font-size:10px;color:var(--m);margin-top:2px}.pv{font-size:10px;color:rgba(99,102,241,.68)}
+.ib2{padding:4px 9px;border-radius:5px;font-size:10px;font-family:'Outfit',sans-serif;cursor:pointer;border:1px solid rgba(99,102,241,.37);background:rgba(99,102,241,.12);color:#818cf8;flex-shrink:0;transition:all .2s;}
+.ib2:hover{background:rgba(99,102,241,.28);}
+.ib2.done{background:rgba(16,185,129,.09);border-color:rgba(16,185,129,.26);color:var(--g);cursor:default}
+
+/* ── GAMES HUB ── */
+#wgames{top:85px;left:110px;width:600px;height:500px;z-index:10;}
+.gbd{padding:11px;height:100%;display:flex;flex-direction:column;gap:8px;overflow-y:auto;}
+.games-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1;overflow-y:auto;}
+.game-card{display:flex;flex-direction:column;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px;cursor:pointer;transition:all .2s;gap:6px;}
+.game-card:hover{background:rgba(255,255,255,.06);border-color:rgba(99,102,241,.2);transform:translateY(-2px);}
+.game-icon{width:100%;height:100px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:bold;}
+.game-title{font-size:12px;font-weight:600;color:rgba(255,255,255,.9);}
+.game-cat{font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px;}
+.game-desc{font-size:10px;color:rgba(255,255,255,.5);line-height:1.4;margin:2px 0;}
+.game-rating{display:flex;align-items:center;gap:3px;font-size:10px;color:#fbbf24;}
+.game-btn{padding:4px 8px;border-radius:5px;font-size:10px;font-family:'Outfit',sans-serif;cursor:pointer;border:1px solid rgba(16,185,129,.37);background:rgba(16,185,129,.12);color:var(--g);transition:all .2s;}
+.game-btn:hover{background:rgba(16,185,129,.28);}
+.game-btn.inst{border-color:rgba(99,102,241,.37);background:rgba(99,102,241,.12);color:#818cf8;}
+.game-btn.inst:hover{background:rgba(99,102,241,.28);}
+.game-btn.done{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.35);cursor:default;opacity:.7;}
+#games-list::-webkit-scrollbar{width:4px;}
+#games-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px;}
+.games-list::-webkit-scrollbar{width:4px;}
+.games-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px;}
+
+/* ── NEX AI ── */
+#wa{top:62px;left:85px;width:380px;height:340px;z-index:10;}
+.aib{padding:12px;height:100%;display:flex;flex-direction:column;gap:9px;overflow-y:auto;}
+.am{display:flex;gap:9px;}
+.aav{width:27px;height:27px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;color:white;}
+.ab2{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:9px 11px;font-size:12px;color:rgba(255,255,255,.74);line-height:1.55;flex:1;}
+.air{display:flex;gap:7px;margin-top:auto;flex-shrink:0;}
+.aii{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:7px 11px;color:white;font-size:12px;font-family:'Outfit',sans-serif;outline:none;}
+.aii:focus{border-color:rgba(99,102,241,.36);}
+.ais{padding:7px 13px;border-radius:8px;background:rgba(99,102,241,.25);border:1px solid rgba(99,102,241,.4);color:#818cf8;font-size:12px;cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif;}
+.ais:hover{background:rgba(99,102,241,.4);}
+
+/* ── NEXA SOCIAL ── */
+#wnx{top:55px;left:200px;width:440px;height:520px;z-index:10;}
+.nxb{height:100%;display:flex;flex-direction:column;}
+.nxtabs{display:flex;padding:0 13px;border-bottom:1px solid var(--b);flex-shrink:0;}
+.nxtb{padding:8px 12px;font-size:12px;color:var(--m);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;user-select:none;}
+.nxtb:hover{color:rgba(255,255,255,.7);}
+.nxtb.on{color:#f43f5e;border-bottom-color:#f43f5e;}
+.nxp{display:none;flex:1;overflow:hidden;flex-direction:column;}
+.nxp.on{display:flex;}
+.nxfeed{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:9px;}
+.nxfeed::-webkit-scrollbar{width:4px;}
+.nxfeed::-webkit-scrollbar-thumb{background:rgba(255,255,255,.07);}
+.nxpost{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:11px;padding:12px;display:flex;flex-direction:column;gap:8px;transition:border-color .2s;}
+.nxpost:hover{border-color:rgba(244,63,94,.18);}
+.nxph{display:flex;align-items:center;gap:8px;}
+.nxav{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.nxun{font-size:12px;color:rgba(255,255,255,.8);font-weight:500;}
+.nxts{font-size:10px;color:rgba(255,255,255,.24);}
+.nxtag{font-size:10px;padding:2px 7px;border-radius:10px;margin-left:auto;}
+.nxbody{font-size:12px;color:rgba(255,255,255,.7);line-height:1.6;}
+.nxcode{background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#60a5fa;margin:4px 0;}
+.nxact{display:flex;gap:14px;}
+.nxa{font-size:11px;color:rgba(255,255,255,.3);cursor:pointer;display:flex;align-items:center;gap:4px;transition:color .2s;background:none;border:none;font-family:'Outfit',sans-serif;padding:0;}
+.nxa:hover{color:rgba(244,63,94,.8);}
+.nxa.liked{color:#f43f5e;}
+.nxcompose{padding:11px;border-top:1px solid var(--b);flex-shrink:0;display:flex;gap:8px;}
+.nxci{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px 11px;color:white;font-size:12px;font-family:'Outfit',sans-serif;outline:none;resize:none;height:60px;}
+.nxci:focus{border-color:rgba(244,63,94,.3);}
+.nxsend{padding:8px 14px;border-radius:8px;background:rgba(244,63,94,.2);border:1px solid rgba(244,63,94,.35);color:#f87171;font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;font-weight:500;align-self:flex-end;transition:all .2s;}
+.nxsend:hover{background:rgba(244,63,94,.35);}
+
+/* ── USB MANAGER ── */
+#wusb{top:70px;left:60px;width:380px;height:340px;z-index:10;}
+.usbd{padding:14px;height:100%;display:flex;flex-direction:column;gap:11px;overflow-y:auto;}
+.usb-hd{display:flex;align-items:center;gap:10px;padding:11px 13px;background:rgba(13,148,136,.07);border:1px solid rgba(13,148,136,.18);border-radius:10px;}
+.usb-ic{width:36px;height:36px;background:linear-gradient(135deg,#0d9488,#0891b2);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.usb-name{font-size:13px;font-weight:600;color:rgba(255,255,255,.87);}
+.usb-sz{font-size:11px;color:rgba(255,255,255,.38);}
+.usb-status{font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);color:var(--g);margin-left:auto;}
+.usb-sec{font-size:10px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:1px;}
+.usb-bar-wrap{background:rgba(255,255,255,.05);border-radius:5px;height:8px;overflow:hidden;}
+.usb-bar-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#0d9488,#0891b2);transition:width 1s ease;}
+.usb-stats{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.usb-stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:9px;}
+.usb-sl{font-size:10px;color:rgba(255,255,255,.28);}
+.usb-sv{font-size:14px;font-weight:600;color:rgba(255,255,255,.82);margin-top:2px;}
+.persist-row{display:flex;align-items:center;gap:10px;padding:10px 13px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:9px;}
+.persist-info{flex:1;}
+.persist-title{font-size:12px;color:rgba(255,255,255,.78);font-weight:500;}
+.persist-sub{font-size:10px;color:rgba(255,255,255,.3);margin-top:2px;}
+.tog{width:38px;height:21px;border-radius:21px;background:rgba(255,255,255,.1);border:none;cursor:pointer;position:relative;transition:background .25s;flex-shrink:0;}
+.tog::after{content:'';position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;background:white;transition:transform .25s;}
+.tog.on{background:rgba(16,185,129,.6);}
+.tog.on::after{transform:translateX(17px);}
+.usb-btn{padding:6px 14px;border-radius:7px;font-size:11px;font-family:'Outfit',sans-serif;cursor:pointer;font-weight:500;border:1px solid;transition:all .2s;align-self:flex-start;}
+.usb-eject{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.28);color:#ef4444;}
+.usb-eject:hover{background:rgba(239,68,68,.25);}
+.usb-sync{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.28);color:var(--g);}
+.usb-sync:hover{background:rgba(16,185,129,.25);}
+
+/* ── PARAMÈTRES ── */
+#wc{top:58px;left:80px;width:500px;height:400px;z-index:10;}
+.cfgb{display:flex;height:100%;}
+.cfgn{width:140px;border-right:1px solid var(--b);padding:10px 8px;display:flex;flex-direction:column;gap:2px;flex-shrink:0;overflow-y:auto;}
+.cfgni{padding:7px 10px;border-radius:8px;font-size:12px;color:var(--m);cursor:pointer;transition:all .17s;user-select:none;}
+.cfgni:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.7);}
+.cfgni.on{background:rgba(99,102,241,.15);color:#818cf8;}
+.cfgc{flex:1;overflow-y:auto;padding:14px;}
+.cfgs{display:none;flex-direction:column;gap:12px;}
+.cfgs.on{display:flex;}
+.cfgt{font-size:13px;font-weight:600;color:rgba(255,255,255,.82);padding-bottom:9px;border-bottom:1px solid var(--b);}
+.gst2{display:flex;align-items:center;gap:9px;}
+.gsl{font-size:12px;color:var(--m);}
+.badge{font-size:11px;padding:3px 8px;border-radius:5px;font-weight:500;}
+.bok{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);color:var(--g)}.ber{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);color:#ef4444}
+.cfgr{display:flex;flex-direction:column;gap:5px;}
+.cfgl{font-size:11px;color:rgba(255,255,255,.36);}
+.cfgi{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px 11px;color:white;font-size:12px;font-family:'Outfit',sans-serif;outline:none;width:100%;}
+.cfgi:focus{border-color:rgba(99,102,241,.4);}
+.cfgsv{padding:7px 16px;border-radius:8px;background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.38);color:#818cf8;font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;font-weight:500;align-self:flex-start;transition:all .2s;}
+.cfgsv:hover{background:rgba(99,102,241,.35);}
+.trow{display:flex;align-items:center;gap:11px;padding:9px 11px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:8px;}
+.trl{font-size:12px;color:rgba(255,255,255,.72);}.trs{font-size:10px;color:rgba(255,255,255,.28);margin-top:2px;}
+
+/* ── NOTIF ── */
+#nf{position:fixed;top:48px;right:16px;background:rgba(12,16,28,.98);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;min-width:220px;z-index:9999;display:none;box-shadow:0 12px 40px rgba(0,0,0,.7);animation:nfin .25s ease;}
+@keyframes nfin{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.nfh{display:flex;align-items:center;gap:7px;margin-bottom:4px;}
+.nfd{width:6px;height:6px;border-radius:50%;background:var(--g);}
+.nft{font-size:11px;color:rgba(255,255,255,.5);font-weight:500;letter-spacing:.5px;}
+.nfb{font-size:12px;color:rgba(255,255,255,.8);}
+
+/* ── CONTEXT MENU ── */
+#ctx{position:fixed;background:rgba(12,16,28,.98);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:5px;z-index:9998;display:none;min-width:165px;box-shadow:0 12px 40px rgba(0,0,0,.7);}
+.ctxi{padding:7px 12px;border-radius:6px;font-size:12px;color:rgba(255,255,255,.72);cursor:pointer;transition:all .15s;}
+.ctxi:hover{background:rgba(99,102,241,.15);color:white;}
+.ctxsep{height:1px;background:rgba(255,255,255,.07);margin:4px 0;}
+
+/* CPU WIDGET */
+#cpuv{font-size:11px;color:var(--g);font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+
+<!-- BOOT -->
+<div class="screen act" id="boot">
+  <div class="blive">LIVE USB</div>
+  <div class="blogo">NEXOS</div>
+  <div class="bsub">v0.2 · Système Live USB</div>
+  <div class="busb"><div class="busb-dot"></div><span id="usbname">USB_NEXOS_32GB détecté</span></div>
+  <div class="bbarw"><div class="bbar" id="bbar"></div></div>
+  <div class="bmsg" id="bmsg"></div>
+  <div class="bver">NEXOS v0.2.0-live · Kernel 6.1.0-nex · arch x86_64/aarch64</div>
+</div>
+
+<!-- LOGIN -->
+<div class="screen" id="login">
+  <div class="ltm" id="ltm">00:00</div>
+  <div class="ldt" id="ldt"></div>
+  <div class="lbox">
+    <div class="lav">🖥</div>
+    <div class="lname" id="lname">Utilisateur NEXOS</div>
+    <div class="llive">🔌 SESSION LIVE USB</div>
+    <input class="linp" type="password" id="lpw" placeholder="Mot de passe..." oninput="updDots()" onkeydown="if(event.key==='Enter')doLogin()" autocomplete="off">
+    <div class="ldots"><div class="ldot" id="d0"></div><div class="ldot" id="d1"></div><div class="ldot" id="d2"></div><div class="ldot" id="d3"></div></div>
+    <button class="lbtn" onclick="doLogin()">Déverrouiller</button>
+    <div class="lerr" id="lerr"></div>
+    <div class="ltip">💾 Rien n'est installé sur le PC · Tout est sur la clé USB</div>
+  </div>
+</div>
+
+<!-- DESKTOP -->
+<div id="ds">
+  <div id="wp"></div><div id="gr"></div>
+
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <button class="start-btn" onclick="togW('wstart')">☰</button>
+    <span class="logo">NEXOS</span>
+    <div class="live-badge">LIVE</div>
+    <div class="tbsrch" id="topSearchBar">
+      <input class="tbsrch-input" id="urlBar" placeholder="URL ou recherche..." onkeydown="if(event.key==='Enter'){openUrl();}" autocomplete="off">
+      <button class="tbsrch-go" onclick="openUrl()">Go</button>
+    </div>
+    <div class="topbar-engines">
+      <div class="sbg g sel" id="tb-sb-g" onclick="setSrc('g')"><div class="sd"></div>G</div>
+      <div class="sbg b" id="tb-sb-b" onclick="setSrc('b')"><div class="sd"></div>B</div>
+      <div class="sbg d" id="tb-sb-d" onclick="setSrc('d')"><div class="sd"></div>D</div>
+    </div>
+    <div class="tbr">
+      <div class="aidot"></div>
+      <span class="si">NEX AI <b id="aitag">OFF</b></span>
+      <span id="zind">⚡ZRAM</span>
+      <span id="cpuv">—</span>
+      <div class="usb-badge" onclick="openW('wusb')" id="usbBadge">🔌 USB</div>
+      <span id="clk">00:00</span>
+      <div class="tbusr" onclick="togUserMenu()">
+        <span>👤</span><span id="unametb">user</span><span>▾</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div id="sb">
+    <button class="sbb" title="NEXSEARCH" onclick="togW('ws')">⌕</button>
+    <button class="sbb" title="NEX AI" onclick="togW('wa')">◉</button>
+    <button class="sbb" title="NEXA Social" onclick="togW('wnx')">◆</button>
+    <button class="sbb" title="Terminal" onclick="togW('wt')">$</button>
+    <button class="sbb" title="Fichiers" onclick="openW('ws');nsTab('files')">▦</button>
+    <button class="sbb" title="ZRAM" onclick="togW('wz')">⚡</button>
+    <button class="sbb" title="Games Hub" onclick="togW('wgames')">🎮</button>
+    <button class="sbb" title="USB Manager" onclick="togW('wusb')">🔌</button>
+    <div style="flex:1"></div>
+    <button class="sbb" title="Paramètres" onclick="togW('wc')">⚙</button>
+  </div>
+
+  <!-- DESKTOP ICONS -->
+  <div id="da">
+    <div class="ia">
+      <div class="di" ondblclick="openW('ws')"><div class="ib is">⌕</div><div class="il">NEX Search</div></div>
+      <div class="di" ondblclick="openW('wa')"><div class="ib ia2">◉</div><div class="il">NEX AI</div></div>
+      <div class="di" ondblclick="openW('wnx')"><div class="ib inexa">◆</div><div class="il">NEXA</div></div>
+      <div class="di" ondblclick="openW('wt')"><div class="ib it">$_</div><div class="il">Terminal</div></div>
+      <div class="di" ondblclick="openW('ws');nsTab('files')"><div class="ib if2">▦</div><div class="il">Fichiers</div></div>
+      <div class="di" ondblclick="openW('wz')"><div class="ib iz">⚡</div><div class="il">ZRAM</div></div>
+      <div class="di" ondblclick="openW('wst2')"><div class="ib ist">◈</div><div class="il">NEX Store</div></div>
+      <div class="di" ondblclick="openW('wgames')"><div class="ib" style="background:linear-gradient(135deg,#ec4899,#8b5cf6)">🎮</div><div class="il">Games Hub</div></div>
+      <div class="di" ondblclick="openW('wusb')"><div class="ib iusb">🔌</div><div class="il">USB Manager</div></div>
+      <div class="di" ondblclick="newFile()"><div class="ib ic2">📄</div><div class="il">Éditeur</div></div>
+      <div class="di" ondblclick="openW('wc')"><div class="ib it">⚙</div><div class="il">Paramètres</div></div>
+    </div>
+  </div>
+
+  <!-- TASKBAR -->
+  <div id="tkb">
+    <div class="ti" id="t-wstart" onclick="togW('wstart')"><span class="ic">☰</span><span class="lb">Démarrer</span></div>
+    <div class="ti" id="t-ws" onclick="togW('ws')"><span class="ic">⌕</span><span class="lb">NEXSEARCH</span></div>
+    <div class="ti" id="t-wa" onclick="togW('wa')"><span class="ic">◉</span><span class="lb">NEX AI</span></div>
+    <div class="ti" id="t-wnx" onclick="togW('wnx')"><span class="ic">◆</span><span class="lb">NEXA</span></div>
+    <div class="ti" id="t-wt" onclick="togW('wt')"><span class="ic">$</span><span class="lb">Terminal</span></div>
+    <div class="ti" id="t-we" onclick="togW('we')"><span class="ic">📄</span><span class="lb">Éditeur</span></div>
+    <div class="ti" id="t-wz" onclick="togW('wz')"><span class="ic">⚡</span><span class="lb">ZRAM</span></div>
+    <div class="ti" id="t-wst2" onclick="togW('wst2')"><span class="ic">◈</span><span class="lb">NEX Store</span></div>
+    <div class="ti" id="t-wgames" onclick="togW('wgames')"><span class="ic">🎮</span><span class="lb">Games Hub</span></div>
+    <div class="ti" id="t-wusb" onclick="togW('wusb')"><span class="ic">🔌</span><span class="lb">USB</span></div>
+    <div class="ti" id="t-wc" onclick="togW('wc')"><span class="ic">⚙</span><span class="lb">Paramètres</span></div>
+    <div class="tsp"></div>
+    <button class="nb" onclick="shutdown()">⏻ Éteindre</button>
+  </div>
+
+  <!-- ══ WINDOWS ══ -->
+
+  <!-- NEXSEARCH -->
+  <div class="win" id="ws">
+    <div class="wtb" id="tb-ws"><div class="wbs"><div class="wb wc" onclick="closeW('ws')">✕</div><div class="wb wm" onclick="closeW('ws')">−</div><div class="wb wx" onclick="maxWin('ws')">+</div></div><span class="wttl">⌕ NEXSEARCH v2</span></div>
+    <div class="wb0">
+      <div class="nsb">
+        <span class="nsl">NEXSEARCH</span>
+        <div class="nsw"><input class="nsi" id="nsq" placeholder="Rechercher..." onkeydown="if(event.key==='Enter')doSearch()"><button class="nsg" onclick="doSearch()">Chercher</button></div>
+      </div>
+      <div class="nstabs">
+        <div class="nstb on" id="ntb-web" onclick="nsTab('web')"><div class="nd"></div>Web</div>
+        <div class="nstb" id="ntb-files" onclick="nsTab('files')"><div class="nd"></div>Fichiers</div>
+        <div class="nstb" id="ntb-hist" onclick="nsTab('hist')"><div class="nd"></div>Historique</div>
+        <span id="wsst" style="margin-left:auto;font-size:10px;color:rgba(255,255,255,.2)"></span>
+      </div>
+      <div class="nsc">
+        <!-- WEB -->
+        <div class="nst on" id="ns-web">
+          <div class="srcb">
+            <div class="sbg g sel" id="sb-g" onclick="setSrc('g')"><div class="sd"></div>Google</div>
+            <div class="sbg b" id="sb-b" onclick="setSrc('b')"><div class="sd"></div>Bing</div>
+            <div class="sbg d" id="sb-d" onclick="setSrc('d')"><div class="sd"></div>DuckDuckGo</div>
+          </div>
+          <div class="ifw">
+            <div id="nshome">
+              <div class="nshl">NEXSEARCH</div>
+              <div class="nshs">Recherche unifiée Web + Fichiers locaux</div>
+              <div class="nssugs">
+                <div class="nssug" onclick="qs('NEXOS linux usb live')">NEXOS linux usb</div>
+                <div class="nssug" onclick="qs('raspberry pi boot')">raspberry pi</div>
+                <div class="nssug" onclick="qs('zram compression linux')">ZRAM linux</div>
+                <div class="nssug" onclick="qs('groq llama api')">Groq API</div>
+                <div class="nssug" onclick="qs('linux live usb persistence')">USB persistence</div>
+              </div>
+            </div>
+            <div id="nsload"><div class="sp"></div><p id="nslt">Chargement...</p></div>
+            <iframe id="nsif" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+            <div id="nsfl">
+              <div class="nab"><div class="nai">N</div><div><div class="nal">NEX AI</div><div class="nat" id="natxt">Résultats locaux NEXSEARCH.</div></div></div>
+            </div>
+          </div>
+        </div>
+        <!-- FICHIERS -->
+        <div class="nst" id="ns-files">
+          <div class="ftb2">
+            <input class="fsr" id="fsr" placeholder="Chercher dans les fichiers..." oninput="filterF()">
+            <button class="ffb on" id="ffb-all" onclick="setFF('all',this)">Tous</button>
+            <button class="ffb" id="ffb-doc" onclick="setFF('doc',this)">Docs</button>
+            <button class="ffb" id="ffb-code" onclick="setFF('code',this)">Code</button>
+            <button class="ffb" id="ffb-nex" onclick="setFF('nex',this)">NEX</button>
+          </div>
+          <div class="fls" id="fls"></div>
+        </div>
+        <!-- HISTORIQUE -->
+        <div class="nst" id="ns-hist">
+          <div class="hta">
+            <div class="hs">Aujourd'hui</div>
+            <div class="hit" onclick="qs('NEXOS raspberry pi')"><span>⌕</span><span class="hq">NEXOS raspberry pi</span><span class="hbg hg">Google</span><span class="htm">14:32</span></div>
+            <div class="hit" onclick="qs('nex-zram benchmark')"><span>⌕</span><span class="hq">nex-zram compression benchmark</span><span class="hbg hg">Google</span><span class="htm">13:18</span></div>
+            <div class="hit" onclick="nsTab('files')"><span>▦</span><span class="hq">nexos (fichiers locaux)</span><span class="hbg hf">Fichiers</span><span class="htm">12:45</span></div>
+            <div class="hs" style="margin-top:8px">Hier</div>
+            <div class="hit" onclick="qs('linux live usb persistence')"><span>⌕</span><span class="hq">linux live usb persistence</span><span class="hbg hg">Google</span><span class="htm">18:05</span></div>
+            <div class="hit" onclick="qs('groq llama api')"><span>⌕</span><span class="hq">groq llama 3.3 api</span><span class="hbg hg">Google</span><span class="htm">16:20</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="resizer" id="r-ws"></div>
+  </div>
+
+  <!-- ÉDITEUR -->
+  <div class="win" id="we">
+    <div class="wtb" id="tb-we"><div class="wbs"><div class="wb wc" onclick="closeW('we')">✕</div><div class="wb wm" onclick="closeW('we')">−</div><div class="wb wx" onclick="maxWin('we')">+</div></div><span class="wttl" id="ed-title">📄 Éditeur — Sans titre</span></div>
+    <div class="wb0">
+      <div class="ed-toolbar">
+        <span class="ed-fname" id="ed-fname">Sans titre</span>
+        <span class="ed-lang" id="ed-lang">TEXTE</span>
+        <button class="ed-btn ed-save" onclick="saveFile()">💾 Sauvegarder</button>
+        <button class="ed-btn ed-close2" onclick="newFile()">+ Nouveau</button>
+      </div>
+      <div class="ed-wrap">
+        <div class="ed-lines" id="ed-lines">1</div>
+        <textarea class="ed-area" id="ed-area" spellcheck="false" oninput="updEditor()" onscroll="syncScroll()" placeholder="Ouvre un fichier ou commence à écrire..."></textarea>
+      </div>
+      <div class="ed-status">
+        <span class="ed-st-item">Ligne <b id="ed-line">1</b></span>
+        <span class="ed-st-item">Col <b id="ed-col">1</b></span>
+        <span class="ed-st-item">Caractères <b id="ed-chars">0</b></span>
+        <span class="ed-st-item" id="ed-saved" style="color:var(--g)">✓ Sauvegardé</span>
+      </div>
+    </div>
+    <div class="resizer" id="r-we"></div>
+  </div>
+
+  <!-- TERMINAL -->
+  <div class="win" id="wt">
+    <div class="wtb" id="tb-wt"><div class="wbs"><div class="wb wc" onclick="closeW('wt')">✕</div><div class="wb wm" onclick="closeW('wt')">−</div><div class="wb wx" onclick="maxWin('wt')">+</div></div><span class="wttl">Terminal NEXOS</span></div>
+    <div class="wb0">
+      <div class="trm">
+        <div class="trm-out" id="trm-out">
+          <div class="tl" style="color:rgba(99,102,241,.7);margin-bottom:6px;">NEXOS Terminal v0.2 · Live USB Edition · type 'help' for commands</div>
+        </div>
+        <div class="trm-inp-row">
+          <span class="trm-prompt-label" id="trm-prompt">nexos@live ~ $</span>
+          <input class="trm-inp" id="trm-inp" placeholder="Tape une commande..." onkeydown="trmKey(event)" autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+    </div>
+    <div class="resizer" id="r-wt"></div>
+  </div>
+
+  <!-- ZRAM -->
+  <div class="win" id="wz">
+    <div class="wtb" id="tb-wz"><div class="wbs"><div class="wb wc" onclick="closeW('wz')">✕</div><div class="wb wm" onclick="closeW('wz')">−</div><div class="wb wx">+</div></div><span class="wttl">⚡ ZRAM — Mémoire compressée</span></div>
+    <div class="wb0"><div class="zbd">
+      <div class="zr"><span class="zba off" id="zbg">OFF</span><span style="font-size:11px;color:var(--m)" id="zbt">ZRAM inactif</span><button class="ztg off" id="ztg" onclick="togZ()">Activer</button></div>
+      <div class="zst2">Mémoire système</div>
+      <div class="sg"><div class="sc"><div class="sl">RAM totale</div><div class="sv sb2">4.0 GB</div><div class="ss">physique</div></div><div class="sc"><div class="sl">RAM utilisée</div><div class="sv sp2" id="zu">1.2 GB</div><div class="mb"><div class="mb2" id="zbar" style="width:30%;background:linear-gradient(90deg,#a78bfa,#6366f1)"></div></div></div><div class="sc"><div class="sl">Gain ZRAM</div><div class="sv sg2" id="zg">—</div><div class="ss" id="zrt">ratio: —</div></div></div>
+      <div class="zst2">Algorithme</div>
+      <div class="al"><div class="ab on" onclick="setA(this,'lz4')">lz4 (rapide)</div><div class="ab" onclick="setA(this,'zstd')">zstd (équilibré)</div><div class="ab" onclick="setA(this,'lzo')">lzo</div><div class="ab" onclick="setA(this,'deflate')">deflate (max)</div></div>
+      <div class="zst2">Périphériques</div>
+      <div class="dl" id="zdl"><div style="font-size:11px;color:rgba(255,255,255,.18);padding:5px 0;">Aucun périphérique actif</div></div>
+      <button class="zb2" onclick="applyZ()">Appliquer et sauvegarder</button>
+    </div></div>
+    <div class="resizer" id="r-wz"></div>
+  </div>
+
+  <!-- NEX STORE -->
+  <div class="win" id="wst2">
+    <div class="wtb" id="tb-wst2"><div class="wbs"><div class="wb wc" onclick="closeW('wst2')">✕</div><div class="wb wm" onclick="closeW('wst2')">−</div><div class="wb wx">+</div></div><span class="wttl">◈ NEX Store</span></div>
+    <div class="wb0"><div class="stbd">
+      <input class="ssi" id="store-search" placeholder="Chercher un paquet NEX..." oninput="filterStore()">
+      <div class="sca"><div class="sc2 on" onclick="storeTab('all',this)">Tous</div><div class="sc2" onclick="storeTab('sys',this)">Système</div><div class="sc2" onclick="storeTab('ia',this)">IA</div><div class="sc2" onclick="storeTab('dev',this)">Dev</div><div class="sc2" onclick="storeTab('games',this)">Jeux</div><div class="sc2" onclick="storeTab('usb',this)">USB</div></div>
+      <div class="pl" id="store-list"></div>
+    </div></div>
+    <div class="resizer" id="r-wst2"></div>
+  </div>
+
+  <!-- GAMES HUB -->
+  <div class="win" id="wgames">
+    <div class="wtb" id="tb-wgames"><div class="wbs"><div class="wb wc" onclick="closeW('wgames')">✕</div><div class="wb wm" onclick="closeW('wgames')">−</div><div class="wb wx" onclick="maxWin('wgames')">+</div></div><span class="wttl">🎮 Games Hub — Jeux & Apps</span></div>
+    <div class="wb0">
+      <div class="gbd">
+        <input class="ssi" id="games-search" placeholder="Chercher un jeu..." oninput="filterGames()">
+        <div class="sca" id="games-cats"><div class="sc2 on" onclick="gamesTab('all',this)">Tous</div><div class="sc2" onclick="gamesTab('emulators',this)">Émulateurs</div><div class="sc2" onclick="gamesTab('casual',this)">Casual</div><div class="sc2" onclick="gamesTab('action',this)">Action/Adventure</div><div class="sc2" onclick="gamesTab('indie',this)">Indie</div><div class="sc2" onclick="gamesTab('tools',this)">Tools</div></div>
+        <div class="games-list" id="games-list"></div>
+      </div>
+    </div>
+    <div class="resizer" id="r-wgames"></div>
+  </div>
+
+  <!-- NEX AI -->
+  <div class="win" id="wa">
+    <div class="wtb" id="tb-wa"><div class="wbs"><div class="wb wc" onclick="closeW('wa')">✕</div><div class="wb wm" onclick="closeW('wa')">−</div><div class="wb wx">+</div></div><span class="wttl">◉ NEX AI — Copilote Groq</span></div>
+    <div class="wb0">
+      <div class="aib" id="aib">
+        <div class="am"><div class="aav" style="background:linear-gradient(135deg,#059669,#0d9488)">N</div><div class="ab2">Bonjour ! Je suis <b>NEX AI</b>. Configure ta clé <b>Groq</b> dans <b>Paramètres → NEX AI</b> pour activer la vraie IA. Je tourne en <b>session Live USB</b> — rien n'est installé sur ton PC !</div></div>
+        <div class="air"><input class="aii" id="aii" placeholder="Parle à NEX AI..." onkeydown="if(event.key==='Enter')sendAI()"><button class="ais" onclick="sendAI()">↗</button></div>
+      </div>
+    </div>
+    <div class="resizer" id="r-wa"></div>
+  </div>
+
+  <!-- NEXA SOCIAL -->
+  <div class="win" id="wnx">
+    <div class="wtb" id="tb-wnx"><div class="wbs"><div class="wb wc" onclick="closeW('wnx')">✕</div><div class="wb wm" onclick="closeW('wnx')">−</div><div class="wb wx" onclick="maxWin('wnx')">+</div></div><span class="wttl">◆ NEXA — Communauté NEXOS</span></div>
+    <div class="wb0">
+      <div class="nxb">
+        <div class="nxtabs">
+          <div class="nxtb on" id="nxtb-feed" onclick="nxTab('feed')">Feed</div>
+          <div class="nxtb" id="nxtb-local" onclick="nxTab('local')">Local</div>
+          <div class="nxtb" id="nxtb-nex" onclick="nxTab('nex')">NEX Updates</div>
+          <div class="nxtb" id="nxtb-me" onclick="nxTab('me')">Profil</div>
+        </div>
+        <!-- FEED -->
+        <div class="nxp on" id="nxp-feed">
+          <div class="nxfeed" id="nxfeed-list"></div>
+          <div class="nxcompose">
+            <textarea class="nxci" id="nxci" placeholder="Partage quelque chose avec la communauté NEXOS..."></textarea>
+            <button class="nxsend" onclick="nxPost()">Publier</button>
+          </div>
+        </div>
+        <!-- LOCAL -->
+        <div class="nxp" id="nxp-local">
+          <div class="nxfeed" id="nxfeed-local"></div>
+        </div>
+        <!-- NEX UPDATES -->
+        <div class="nxp" id="nxp-nex">
+          <div class="nxfeed" id="nxfeed-nex"></div>
+        </div>
+        <!-- PROFIL -->
+        <div class="nxp" id="nxp-me" style="align-items:center;justify-content:center;gap:13px;padding:20px;">
+          <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,rgba(244,63,94,.3),rgba(147,51,234,.3));border:2px solid rgba(244,63,94,.4);display:flex;align-items:center;justify-content:center;font-size:28px;">🐧</div>
+          <div style="font-size:16px;font-weight:600" id="nx-uname">user</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.35);">Membre NEXA · Session Live USB</div>
+          <div style="display:flex;gap:22px;margin-top:8px;">
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:#f43f5e" id="nx-posts">0</div><div style="font-size:11px;color:rgba(255,255,255,.3)">Posts</div></div>
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:#818cf8">12</div><div style="font-size:11px;color:rgba(255,255,255,.3)">Followers</div></div>
+            <div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--g)">5</div><div style="font-size:11px;color:rgba(255,255,255,.3)">Suivis</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="resizer" id="r-wnx"></div>
+  </div>
+
+  <!-- USB MANAGER -->
+  <div class="win" id="wstart">
+    <div class="wtb" id="tb-wstart"><div class="wbs"><div class="wb wc" onclick="closeW('wstart')">✕</div><div class="wb wm" onclick="closeW('wstart')">−</div><div class="wb wx" onclick="maxWin('wstart')">+</div></div><span class="wttl">☰ Menu Démarrer</span></div>
+    <div class="wb0">
+      <div class="start-grid">
+        <div class="start-card" onclick="openW('ws')"><div class="sk">⌕</div><div>NEX Search</div></div>
+        <div class="start-card" onclick="openW('wa')"><div class="sk">◉</div><div>NEX AI</div></div>
+        <div class="start-card" onclick="openW('wnx')"><div class="sk">◆</div><div>NEXA</div></div>
+        <div class="start-card" onclick="openW('wt')"><div class="sk">$</div><div>Terminal</div></div>
+        <div class="start-card" onclick="openW('wst2')"><div class="sk">◈</div><div>NEX Store</div></div>
+        <div class="start-card" onclick="openW('wusb')"><div class="sk">🔌</div><div>USB Manager</div></div>
+        <div class="start-card" onclick="openW('wz')"><div class="sk">⚡</div><div>ZRAM</div></div>
+        <div class="start-card" onclick="openW('wc')"><div class="sk">⚙</div><div>Paramètres</div></div>
+        <div class="start-card" onclick="openW('wquiz')"><div class="sk">❓</div><div>Quiz Maker</div></div>
+      </div>
+    </div>
+    <div class="resizer" id="r-wstart"></div>
+  </div>
+  <div class="win" id="wquiz">
+    <div class="wtb" id="tb-wquiz"><div class="wbs"><div class="wb wc" onclick="closeW('wquiz')">✕</div><div class="wb wm" onclick="closeW('wquiz')">−</div><div class="wb wx" onclick="maxWin('wquiz')">+</div></div><span class="wttl">❓ Générateur de Quiz</span></div>
+    <div class="wb0">
+      <div class="quiz-body">
+        <div class="cfgt">Créer un quiz pour élèves</div>
+        <div class="cfgr"><div class="cfgl">Sujet</div><input class="cfgi" id="quiz-topic" placeholder="ex: histoire, maths, biologie"></div>
+        <div class="cfgr"><div class="cfgl">Niveau</div><select class="cfgi" id="quiz-level"><option>CM2</option><option>Collège</option><option>Lycée</option><option>Université</option></select></div>
+        <div class="cfgr"><div class="cfgl">Nombre de questions</div><input class="cfgi" id="quiz-count" type="number" min="1" max="10" value="5"></div>
+        <button class="cfgsv" onclick="generateQuiz()">Générer le quiz</button>
+        <div class="quiz-output" id="quiz-output">Réponses et questions générées ici.</div>
+      </div>
+    </div>
+    <div class="resizer" id="r-wquiz"></div>
+  </div>
+  <div class="win" id="wusb">
+    <div class="wtb" id="tb-wusb"><div class="wbs"><div class="wb wc" onclick="closeW('wusb')">✕</div><div class="wb wm" onclick="closeW('wusb')">−</div><div class="wb wx">+</div></div><span class="wttl">🔌 USB Manager — Clé Live</span></div>
+    <div class="wb0"><div class="usbd">
+      <div class="usb-hd">
+        <div class="usb-ic">🔌</div>
+        <div><div class="usb-name">USB_NEXOS_32GB</div><div class="usb-sz">/dev/sda1 · FAT32+EXT4</div></div>
+        <div class="usb-status">✓ Monté</div>
+      </div>
+      <div class="usb-sec">Espace utilisé</div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.35);margin-bottom:5px;"><span id="usb-used">11.2 GB utilisés</span><span>32 GB total</span></div>
+        <div class="usb-bar-wrap"><div class="usb-bar-fill" id="usb-fill" style="width:35%"></div></div>
+      </div>
+      <div class="usb-stats">
+        <div class="usb-stat"><div class="usb-sl">OS + Système</div><div class="usb-sv" style="color:#60a5fa">4.8 GB</div></div>
+        <div class="usb-stat"><div class="usb-sl">Fichiers perso</div><div class="usb-sv" style="color:var(--g)" id="usb-personal">1.2 GB</div></div>
+        <div class="usb-stat"><div class="usb-sl">Paquets NEX</div><div class="usb-sv" style="color:#a78bfa" id="usb-pkgs">0.4 GB</div></div>
+        <div class="usb-stat"><div class="usb-sl">Dispo</div><div class="usb-sv" style="color:rgba(255,255,255,.6)">20.6 GB</div></div>
+      </div>
+      <div class="usb-sec">Persistance</div>
+      <div class="persist-row">
+        <div class="persist-info">
+          <div class="persist-title">Mode persistant</div>
+          <div class="persist-sub">Les fichiers sont sauvegardés sur la clé USB</div>
+        </div>
+        <button class="tog on" id="persist-tog" onclick="togPersist(this)"></button>
+      </div>
+      <div class="persist-row">
+        <div class="persist-info">
+          <div class="persist-title">Sync auto</div>
+          <div class="persist-sub">Sauvegarde toutes les 5 minutes</div>
+        </div>
+        <button class="tog on" onclick="this.classList.toggle('on')"></button>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="usb-btn usb-sync" onclick="usbSync()">↻ Synchroniser</button>
+        <button class="usb-btn usb-eject" onclick="usbEject()">⏏ Éjecter</button>
+      </div>
+    </div></div>
+    <div class="resizer" id="r-wusb"></div>
+  </div>
+
+  <!-- PARAMÈTRES -->
+  <div class="win" id="wc">
+    <div class="wtb" id="tb-wc"><div class="wbs"><div class="wb wc" onclick="closeW('wc')">✕</div><div class="wb wm" onclick="closeW('wc')">−</div><div class="wb wx">+</div></div><span class="wttl">⚙ Paramètres NEXOS</span></div>
+    <div class="wb0">
+      <div class="cfgb">
+        <div class="cfgn">
+          <div class="cfgni on" onclick="cfgNav('ai',this)">◉ NEX AI</div>
+          <div class="cfgni" onclick="cfgNav('sys',this)">🖥 Système</div>
+          <div class="cfgni" onclick="cfgNav('cpt',this)">👤 Compte</div>
+          <div class="cfgni" onclick="cfgNav('net',this)">🌐 Réseau</div>
+          <div class="cfgni" onclick="cfgNav('usb',this)">🔌 USB Live</div>
+          <div class="cfgni" onclick="cfgNav('sec',this)">🔒 Sécurité</div>
+        </div>
+        <div class="cfgc">
+          <div class="cfgs on" id="cfg-ai">
+            <div class="cfgt">NEX AI — Clé API Groq</div>
+            <div class="gst2"><div class="gsl">Statut :</div><span class="badge ber" id="gst">✗ Aucune clé</span></div>
+            <div class="cfgr"><div class="cfgl">Clé API Groq (gsk_...)</div><input class="cfgi" type="password" id="gkey" placeholder="gsk_..." oninput="updG()"></div>
+            <div class="cfgr"><div class="cfgl">Modèle</div><select class="cfgi" id="gmod" style="cursor:pointer"><option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (recommandé)</option><option value="llama-3.1-8b-instant">llama-3.1-8b-instant (rapide)</option><option value="mixtral-8x7b-32768">mixtral-8x7b-32768</option></select></div>
+            <div class="cfgr"><div class="cfgl">Persona</div><input class="cfgi" id="gper" value="Tu es NEX AI, le copilote de NEXOS Live USB. Tu aides à gérer le système et les paquets NEX."></div>
+            <button class="cfgsv" onclick="saveG()">💾 Sauvegarder</button>
+            <div style="font-size:11px;color:rgba(255,255,255,.2);line-height:1.5;">Clé gratuite sur <span style="color:rgba(99,102,241,.6)">console.groq.com</span></div>
+          </div>
+          <div class="cfgs" id="cfg-sys">
+            <div class="cfgt">Système</div>
+            <div class="trow"><div><div class="trl">ZRAM au démarrage</div><div class="trs">Active automatiquement</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+            <div class="trow"><div><div class="trl">Animations</div><div class="trs">Effets visuels</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+            <div class="cfgr"><div class="cfgl">Nom d'hôte</div><input class="cfgi" value="nexos-live" id="hostname"></div>
+            <div style="font-size:11px;color:rgba(255,255,255,.25);padding:9px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.12);border-radius:8px;">🔌 Session Live USB — Aucune modification du PC hôte. Tout est sur la clé.</div>
+            <button class="cfgsv" onclick="ntf('Système','Paramètres sauvegardés')">💾 Sauvegarder</button>
+          </div>
+          <div class="cfgs" id="cfg-cpt">
+            <div class="cfgt">Compte</div>
+            <div class="cfgr"><div class="cfgl">Nom d'utilisateur</div><input class="cfgi" id="unameInp" value="user" oninput="document.getElementById('unametb').textContent=this.value;document.getElementById('lname').textContent='Utilisateur '+this.value;document.getElementById('nx-uname').textContent=this.value;"></div>
+            <div class="cfgr"><div class="cfgl">Nouveau mot de passe</div><input class="cfgi" type="password" id="npw" placeholder="Nouveau mot de passe"></div>
+            <div class="cfgr"><div class="cfgl">Confirmer</div><input class="cfgi" type="password" id="cpw" placeholder="Confirmer"></div>
+            <button class="cfgsv" onclick="savePW()">💾 Changer</button>
+          </div>
+          <div class="cfgs" id="cfg-net">
+            <div class="cfgt">Réseau</div>
+            <div class="trow"><div><div class="trl">WiFi</div><div class="trs">wlan0</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+            <div class="cfgr"><div class="cfgl">Réseau</div><input class="cfgi" value="NexNet-5G" readonly style="color:var(--g)"></div>
+            <div class="cfgr"><div class="cfgl">IP</div><input class="cfgi" value="192.168.1.42" readonly></div>
+          </div>
+          <div class="cfgs" id="cfg-usb">
+            <div class="cfgt">USB Live — Configuration</div>
+            <div class="cfgr"><div class="cfgl">Périphérique USB</div><input class="cfgi" value="/dev/sda1 (USB_NEXOS_32GB)" readonly style="color:var(--g)"></div>
+            <div class="trow"><div><div class="trl">Persistance activée</div><div class="trs">Sauvegarde les fichiers sur USB</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+            <div class="trow"><div><div class="trl">Copie en RAM (toram)</div><div class="trs">Décharge l'USB après boot</div></div><button class="tog" onclick="this.classList.toggle('on')"></button></div>
+            <div class="cfgr"><div class="cfgl">Partition persistance</div><input class="cfgi" value="/dev/sda2 (casper-rw)" readonly></div>
+            <button class="cfgsv" onclick="ntf('USB','Configuration sauvegardée')">💾 Sauvegarder</button>
+          </div>
+          <div class="cfgs" id="cfg-sec">
+            <div class="cfgt">Sécurité</div>
+            <div class="trow"><div><div class="trl">Verrouillage auto</div><div class="trs">5 min d'inactivité</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+            <div class="trow"><div><div class="trl">Pare-feu NEX</div><div class="trs">nex-firewall actif</div></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+            <div class="cfgr"><div class="cfgl">Version</div><input class="cfgi" value="NEXOS v0.2.0-live · USB Live Edition" readonly></div>
+            <button class="cfgsv" onclick="lock()">🔒 Verrouiller</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="resizer" id="r-wc"></div>
+  </div>
+
+</div><!-- /ds -->
+
+<!-- NOTIF -->
+<div id="nf"><div class="nfh"><div class="nfd"></div><span class="nft" id="nft">NEXOS</span></div><div class="nfb" id="nfb"></div></div>
+<!-- CONTEXT MENU -->
+<div id="ctx"></div>
+
+<script>
+'use strict';
+const ST={
+  pw:localStorage.getItem('nx-pw')||'nexos',
+  gkey:localStorage.getItem('nx-gkey')||'',
+  gmod:localStorage.getItem('nx-gmod')||'llama-3.3-70b-versatile',
+  gper:localStorage.getItem('nx-gper')||'Tu es NEX AI, le copilote de NEXOS Live USB.',
+  src:localStorage.getItem('nx-src')||'g',
+};
+
+// ══ FILESYSTEM virtuel (localStorage) ══
+const FS_KEY='nexos-fs-v2';
+function loadFS(){try{return JSON.parse(localStorage.getItem(FS_KEY))||defFS();}catch{return defFS();}}
+function saveFS(fs){localStorage.setItem(FS_KEY,JSON.stringify(fs));}
+function defFS(){return[
+  {n:'nexos-kernel.conf',p:'/etc/nexos/',t:'code',s:'4.2 KB',d:'Auj.',i:'⚙',content:'# NEXOS Kernel Configuration\nNEXOS_VERSION=0.2.0\nKERNEL=6.1.0-nex\nARCH=x86_64\nLIVE_USB=yes\nPERSISTENCE=yes\nZRAM_ENABLE=yes\nZRAM_ALGO=lz4\nNEXAI_ENABLE=yes\nNEXSEARCH_ENABLE=yes\nNEXA_ENABLE=yes\n'},
+  {n:'zram.conf',p:'/etc/nexos/',t:'code',s:'1.1 KB',d:'Auj.',i:'⚙',content:'# ZRAM Configuration\nALGO=lz4\nDEVICES=3\nSIZE_0=512M\nSIZE_1=512M\nSIZE_2=256M\nAUTO_START=yes\n'},
+  {n:'nexai.conf',p:'/etc/nexos/',t:'code',s:'0.8 KB',d:'Auj.',i:'◉',content:'# NEX AI Configuration\nPROVIDER=groq\nMODEL=llama-3.3-70b-versatile\nTEMPERATURE=0.7\nMAX_TOKENS=500\nOFFLINE_FALLBACK=yes\n'},
+  {n:'usb.conf',p:'/etc/nexos/',t:'code',s:'1.3 KB',d:'Auj.',i:'🔌',content:'# USB Live Configuration\nDEVICE=/dev/sda1\nLABEL=USB_NEXOS_32GB\nPERSISTENCE=yes\nPERSIST_PART=/dev/sda2\nPERSIST_LABEL=casper-rw\nTORAM=no\nSYNC_INTERVAL=300\n'},
+  {n:'README-nexos.md',p:'/home/user/docs/',t:'doc',s:'8.7 KB',d:'Hier',i:'📝',content:'# NEXOS v0.2 — Documentation\n\n## Présentation\nNEXOS est un OS Linux live sur clé USB. Rien n\'est installé sur le PC hôte.\n\n## Composants\n- **NEXSEARCH** — Moteur de recherche unifié\n- **NEX AI** — Copilote IA propulsé par Groq\n- **NEXA** — Réseau social intégré\n- **ZRAM** — Optimisation mémoire\n- **USB Manager** — Gestion de la clé USB live\n\n## Gestionnaire de paquets\n```\nnex install <paquet>\nnex remove <paquet>\nnex update\nnex list\n```\n\n## USB Live\nBoot depuis la clé USB — mode persistant actif.\nLes fichiers sont sauvegardés sur /dev/sda2 (casper-rw).\n'},
+  {n:'architecture.md',p:'/home/user/docs/',t:'doc',s:'22 KB',d:'Hier',i:'📝',content:'# Architecture NEXOS\n\n## Couches système\n1. Kernel Linux 6.1.0-nex (modifié)\n2. Gestionnaire de paquets NEX\n3. Services système (ZRAM, WiFi, NEX AI)\n4. Interface graphique NEXUI\n5. Applications NEX (Search, AI, NEXA, Files)\n\n## USB Live\n- Boot depuis USB sans modifier le PC\n- Persistance sur partition casper-rw\n- Compatible Vieux PC (x86_64 / aarch64)\n'},
+  {n:'nexa-social.nex',p:'/home/user/nex/',t:'nex',s:'14 MB',d:'Auj.',i:'◆',content:'# Paquet NEX — nexa-social\nNAME=nexa-social\nVERSION=2.1.0\nDESCRIPTION=Plateforme sociale NEXOS\nDEPS=nexai-core,nex-network\nSIZE=14MB\n'},
+  {n:'nexai-core.nex',p:'/home/user/nex/',t:'nex',s:'87 MB',d:'Hier',i:'◉',content:'# Paquet NEX — nexai-core\nNAME=nexai-core\nVERSION=1.4.0\nDESCRIPTION=Moteur IA local hors ligne\nSIZE=87MB\n'},
+  {n:'nex-zram.nex',p:'/usr/nex/',t:'nex',s:'1.8 MB',d:'Dim.',i:'⚡',content:'# Paquet NEX — nex-zram\nNAME=nex-zram\nVERSION=2.0.1\nSTATUS=installed\n'},
+  {n:'nexos-boot.log',p:'/var/log/',t:'doc',s:'19 KB',d:'Auj.',i:'📋',content:'[NEXOS] Detecting USB drive...\n[NEXOS] Found: USB_NEXOS_32GB (/dev/sda)\n[NEXOS] Booting NEXOS v0.2.0-live from USB\n[NEXOS] Kernel 6.1.0-nex loaded\n[NEXOS] ZRAM initialized (lz4)\n[NEXOS] Persistence partition: /dev/sda2 (casper-rw)\n[NEXOS] NEX services started\n[NEXOS] NEXSEARCH index loaded\n[NEXOS] NEX AI ready\n[NEXOS] NEXA social connected\n[NEXOS] Desktop environment started\n[NEXOS] Boot complete in 5.8s\n[NEXOS] Running LIVE USB — no changes to host disk\n'},
+];}
+let VFS=loadFS();
+
+// ══ BOOT ══
+const BMSG=[
+  '🔌 Clé USB détectée : USB_NEXOS_32GB (32GB)...',
+  'Vérification de l\'intégrité de la clé USB...',
+  'Chargement noyau NEXOS 6.1.0-nex...',
+  'Initialisation ZRAM (lz4)...',
+  'Montage partition persistante (casper-rw)...',
+  'Démarrage services NEX...',
+  'Chargement NEX AI (Groq)...',
+  'Index NEXSEARCH chargé...',
+  'NEXA Social en ligne...',
+  'Interface NEXUI...',
+  '✓ NEXOS Live — PC intact, tout sur USB !'
+];
+let bi=0;
+function bootTick(){
+  if(bi>=BMSG.length){setTimeout(showLogin,500);return;}
+  document.getElementById('bbar').style.width=Math.round(bi/BMSG.length*100)+'%';
+  document.getElementById('bmsg').textContent=BMSG[bi++];
+  setTimeout(bootTick,240+Math.random()*140);
+}
+setTimeout(bootTick,600);
+function showLogin(){document.getElementById('boot').classList.remove('act');document.getElementById('login').classList.add('act');updLC();}
+function updLC(){
+  const d=new Date(),h=String(d.getHours()).padStart(2,'0'),m=String(d.getMinutes()).padStart(2,'0');
+  document.getElementById('ltm').textContent=h+':'+m;
+  const days=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const months=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  document.getElementById('ldt').textContent=days[d.getDay()]+' '+d.getDate()+' '+months[d.getMonth()];
+}
+setInterval(updLC,15000);
+function updDots(){const v=document.getElementById('lpw').value;for(let i=0;i<4;i++)document.getElementById('d'+i).classList.toggle('on',i<v.length);}
+function doLogin(){
+  const pw=document.getElementById('lpw').value;
+  if(pw===ST.pw){
+    document.getElementById('login').classList.remove('act');
+    document.getElementById('ds').classList.add('act');
+    document.getElementById('ds').style.display='block';
+    initDS();
+    setTimeout(()=>ntf('NEXOS Live','Bienvenue ! Session USB — PC intact.'),500);
+  }else{
+    document.getElementById('lerr').textContent='✗ Mot de passe incorrect';
+    document.getElementById('lpw').value='';updDots();
+    setTimeout(()=>document.getElementById('lerr').textContent='',2000);
+  }
+}
+function lock(){document.getElementById('ds').classList.remove('act');document.getElementById('login').classList.add('act');document.getElementById('lpw').value='';updDots();updLC();}
+function shutdown(){ntf('NEXOS','Arrêt en cours — données sauvegardées sur USB...');setTimeout(()=>{document.getElementById('ds').classList.remove('act');document.getElementById('boot').classList.add('act');document.getElementById('bbar').style.width='0';document.getElementById('bmsg').textContent='Arrêt du système...';bi=0;},1600);}
+
+// ══ DESKTOP INIT ══
+let dsi=false;
+function initDS(){
+  if(dsi)return;dsi=true;
+  updClk();setInterval(updClk,15000);
+  renderF(VFS);renderStore();renderGames();
+  trmPrint('<span class="to">NEXOS Terminal v0.2 · Live USB Edition</span>');
+  trmPrint('<span class="to">Tape <span class="thl">help</span> pour la liste des commandes</span>');
+  trmPrint('<span style="color:rgba(16,185,129,.5)">🔌 Session live — rien n\'est installé sur ce PC</span>');
+  trmPrompt();
+  cSrc = ST.src || 'g';
+  setSrc(cSrc);
+  if(ST.gkey){document.getElementById('gkey').value=ST.gkey;document.getElementById('gst').textContent='✓ Clé configurée';document.getElementById('gst').className='badge bok';document.getElementById('aitag').textContent='ON';}
+  document.getElementById('gmod').value=ST.gmod;
+  document.getElementById('gper').value=ST.gper;
+  initNexa();
+  setInterval(()=>{document.getElementById('cpuv').textContent=Math.floor(8+Math.random()*14)+'%';},3000);
+}
+
+// ══ USER MENU ══
+function togUserMenu(){
+  showCtx(document.getElementById('unametb').getBoundingClientRect().left,38,[
+    {label:'👤 Profil NEXA',fn:()=>{openW('wnx');nxTab('me');}},
+    {label:'⚙️ Paramètres',fn:()=>openW('wc')},
+    {sep:true},
+    {label:'🔒 Verrouiller',fn:()=>lock()},
+    {label:'⏻ Éteindre',fn:()=>shutdown()},
+  ]);
+}
+
+// ══ WINDOW MANAGER ══
+let zT=10;
+const WINS=['wstart','ws','we','wt','wa','wz','wst2','wgames','wc','wnx','wusb','wquiz'];
+function focW(id){zT++;const e=document.getElementById(id);if(e)e.style.zIndex=zT;}
+function openW(id){const e=document.getElementById(id);if(!e)return;e.classList.add('op');focW(id);const t=document.getElementById('t-'+id);if(t)t.classList.add('on');}
+function closeW(id){const e=document.getElementById(id);if(e)e.classList.remove('op');const t=document.getElementById('t-'+id);if(t)t.classList.remove('on');}
+function togW(id){const e=document.getElementById(id);if(!e)return;e.classList.contains('op')?closeW(id):openW(id);}
+function maxWin(id){
+  const w=document.getElementById(id);if(!w)return;
+  if(w._maxed){w.style.left=w._ox;w.style.top=w._oy;w.style.width=w._ow;w.style.height=w._oh;w._maxed=false;}
+  else{w._ox=w.style.left;w._oy=w.style.top;w._ow=w.style.width;w._oh=w.style.height;
+    w.style.left='0';w.style.top='38px';w.style.width=(window.innerWidth-64)+'px';w.style.height=(window.innerHeight-90)+'px';w._maxed=true;}
+  focW(id);
+}
+WINS.forEach(id=>{
+  const tb=document.getElementById('tb-'+id),win=document.getElementById(id);
+  if(!tb||!win)return;
+  let drag=false,ox=0,oy=0;
+  tb.addEventListener('mousedown',e=>{if(e.target.classList.contains('wb'))return;drag=true;const r=win.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;focW(id);e.preventDefault();});
+  document.addEventListener('mousemove',e=>{if(!drag)return;let nx=e.clientX-ox,ny=e.clientY-oy;nx=Math.max(0,Math.min(nx,window.innerWidth-win.offsetWidth));ny=Math.max(38,Math.min(ny,window.innerHeight-win.offsetHeight-52));win.style.left=nx+'px';win.style.top=ny+'px';win.style.right='auto';win.style.bottom='auto';});
+  document.addEventListener('mouseup',()=>drag=false);
+  win.addEventListener('mousedown',()=>focW(id));
+});
+WINS.forEach(id=>{
+  const rz=document.getElementById('r-'+id),win=document.getElementById(id);
+  if(!rz||!win)return;
+  let resizing=false,sx=0,sy=0,sw=0,sh=0;
+  rz.addEventListener('mousedown',e=>{resizing=true;sx=e.clientX;sy=e.clientY;sw=win.offsetWidth;sh=win.offsetHeight;focW(id);e.preventDefault();e.stopPropagation();});
+  document.addEventListener('mousemove',e=>{if(!resizing)return;const nw=Math.max(280,sw+(e.clientX-sx)),nh=Math.max(180,sh+(e.clientY-sy));win.style.width=nw+'px';win.style.height=nh+'px';});
+  document.addEventListener('mouseup',()=>resizing=false);
+});
+
+// ══ CLOCK ══
+function updClk(){const d=new Date();document.getElementById('clk').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+
+// ══ NOTIF ══
+let nfT;
+function ntf(t,m){document.getElementById('nft').textContent=t;document.getElementById('nfb').textContent=m;const n=document.getElementById('nf');n.style.display='block';clearTimeout(nfT);nfT=setTimeout(()=>n.style.display='none',3500);}
+
+// ══ NEXSEARCH ══
+let cSrc='g',nTabS='web',ffF='all',ifrT;
+const srcU={g:q=>'https://www.google.com/search?q='+encodeURIComponent(q)+'&hl=fr',b:q=>'https://www.bing.com/search?q='+encodeURIComponent(q),d:q=>'https://duckduckgo.com/?q='+encodeURIComponent(q)+'&kl=fr-fr'};
+const aiKB={nexos:"NEXOS est un OS Linux live USB. Boot sans installer sur le PC. Persistance sur clé USB.",zram:"ZRAM compresse la RAM. Libère ~40%. lz4 = rapide, zstd = meilleur ratio.",raspberry:"Raspberry Pi 4 (2GB min) compatible. Boot ~4s avec microSD Class 10.",groq:"API Groq ultra-rapide. Configure ta clé dans Paramètres → NEX AI.",usb:"NEXOS démarre depuis USB sans toucher au disque dur. Tout est sauvegardé sur la clé.",nexa:"NEXA est le réseau social intégré de NEXOS. Partage, communauté, updates."};
+function setSrc(s){cSrc=s;ST.src=s;localStorage.setItem('nx-src',s);['g','b','d'].forEach(x=>{document.getElementById('sb-'+x).classList.toggle('sel',x===s);document.getElementById('tb-sb-'+x)?.classList.toggle('sel',x===s);});}
+function openUrl(){const q=document.getElementById('urlBar').value.trim();if(!q)return;const isLikelyUrl=/^(https?:\/\/|www\.)/.test(q)||(!q.includes(' ')&&q.includes('.'));if(isLikelyUrl){let url=q;if(!/^https?:\/\//.test(url))url='https://'+url;openW('ws');nsTab('web');const home=document.getElementById('nshome'),ld=document.getElementById('nsload'),iframe=document.getElementById('nsif'),fl=document.getElementById('nsfl');home.style.display='none';fl.style.display='none';iframe.style.display='none';ld.style.display='flex';document.getElementById('nslt').textContent='Chargement de '+url;document.getElementById('wsst').textContent='URL';iframe.src=url;iframe.onload=()=>{ld.style.display='none';iframe.style.display='block';document.getElementById('wsst').textContent=url;ntf('NEXSEARCH','Page chargée');};return;}document.getElementById('nsq').value=q;doSearch();}
+function nsTab(t){nTabS=t;['web','files','hist'].forEach(x=>{document.getElementById('ns-'+x).classList.toggle('on',x===t);document.getElementById('ntb-'+x).classList.toggle('on',x===t);});}
+function qs(q){document.getElementById('urlBar').value=q;document.getElementById('nsq').value=q;nsTab('web');doSearch();}
+function doSearch(){
+  const q=document.getElementById('nsq').value.trim();if(!q)return;
+  if(nTabS==='files'){document.getElementById('fsr').value=q;filterF();ntf('NEXSEARCH','Recherche dans les fichiers');return;}
+  nsTab('web');openW('ws');
+  const home=document.getElementById('nshome'),ld=document.getElementById('nsload'),iframe=document.getElementById('nsif'),fl=document.getElementById('nsfl');
+  home.style.display='none';fl.style.display='none';iframe.style.display='none';ld.style.display='flex';clearTimeout(ifrT);
+  document.getElementById('nslt').textContent='Recherche "'+q+'"...';document.getElementById('wsst').textContent='Chargement...';
+  iframe.src=srcU[cSrc](q);
+  let ok=false;
+  iframe.onload=()=>{ok=true;ld.style.display='none';iframe.style.display='block';document.getElementById('wsst').textContent='"'+q+'"';ntf('NEXSEARCH','Résultats chargés');};
+  ifrT=setTimeout(()=>{
+    if(!ok){
+      ld.style.display='none';iframe.style.display='none';fl.style.display='flex';fl.style.flexDirection='column';
+      document.getElementById('wsst').textContent='"'+q+'" — local';
+      let ans='Résultats pour "'+q+'".';
+      const ql=q.toLowerCase();for(const[k,v]of Object.entries(aiKB)){if(ql.includes(k)){ans=v;break;}}
+      document.getElementById('natxt').textContent=ans;
+      fl.querySelectorAll('.nsr').forEach(r=>r.remove());
+      [{t:q+' — Résultats web',u:{g:'google.com',b:'bing.com',d:'duckduckgo.com'}[cSrc],d:'Via '+{g:'Google',b:'Bing',d:'DuckDuckGo'}[cSrc]+'.'},{t:'Guide : '+q,u:'docs.nexos.dev',d:'Documentation NEXOS.'},{t:q+' — NEXA',u:'nexa.nexos.dev',d:'Communauté NEXOS.'}].forEach(f=>{const d=document.createElement('div');d.className='nsr';d.innerHTML=`<div class="nsrs">◈ ${f.u}</div><div class="nsrt">${f.t}</div><div class="nsrd">${f.d}</div>`;fl.appendChild(d);});
+    }
+  },3000);
+}
+
+// ══ FICHIERS ══
+let curFileIdx=-1;
+function renderF(fs){
+  const q=(document.getElementById('fsr')?.value||'').toLowerCase();
+  const list=fs.filter(f=>{if(!q&&ffF==='all')return true;if(ffF!=='all'&&f.t!==ffF)return false;return!q||f.n.toLowerCase().includes(q)||f.p.toLowerCase().includes(q);});
+  document.getElementById('fls').innerHTML=list.map((f,i)=>`<div class="fi" onclick="selF(${fs.indexOf(f)})" ondblclick="openFileEditor(${fs.indexOf(f)})" oncontextmenu="fileCtx(event,${fs.indexOf(f)})" id="fi-${fs.indexOf(f)}"><div class="fic ${f.t==='doc'?'fd':f.t==='code'?'fc':f.t==='nex'?'fn':'fm'}">${f.i}</div><div class="fin"><div class="fn2">${f.n}</div><div class="fp2">${f.p}</div></div><div class="fm2"><div>${f.s}</div><div>${f.d}</div></div></div>`).join('');
+}
+function selF(i){document.querySelectorAll('.fi').forEach(x=>x.classList.remove('sel'));document.getElementById('fi-'+i)?.classList.add('sel');}
+function filterF(){renderF(VFS);}
+function setFF(t,el){ffF=t;document.querySelectorAll('.ffb').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderF(VFS);}
+function openFileEditor(i){
+  curFileIdx=i;const f=VFS[i];
+  document.getElementById('ed-area').value=f.content||'';
+  document.getElementById('ed-fname').textContent=f.p+f.n;
+  document.getElementById('ed-title').textContent='📄 '+f.n;
+  document.getElementById('ed-lang').textContent=f.t==='code'?'CONF':f.t==='doc'?'MD':f.t==='nex'?'NEX':'TEXT';
+  updEditor();openW('we');
+}
+function newFile(){curFileIdx=-1;document.getElementById('ed-area').value='';document.getElementById('ed-fname').textContent='Sans titre';document.getElementById('ed-title').textContent='📄 Sans titre';openW('we');}
+function saveFile(){
+  const content=document.getElementById('ed-area').value;
+  if(curFileIdx>=0){VFS[curFileIdx].content=content;VFS[curFileIdx].d='Auj.';saveFS(VFS);document.getElementById('ed-saved').textContent='✓ Sauvegardé';document.getElementById('ed-saved').style.color='var(--g)';ntf('Éditeur','Sauvegardé : '+VFS[curFileIdx].n);}
+  else{const name=prompt('Nom du fichier :','nouveau.txt');if(!name)return;const nf={n:name,p:'/home/user/',t:'doc',s:content.length+' B',d:'Auj.',i:'📄',content};VFS.push(nf);saveFS(VFS);curFileIdx=VFS.length-1;document.getElementById('ed-fname').textContent='/home/user/'+name;document.getElementById('ed-title').textContent='📄 '+name;document.getElementById('ed-saved').textContent='✓ Sauvegardé';document.getElementById('ed-saved').style.color='var(--g)';renderF(VFS);ntf('Éditeur','Créé : '+name);}
+}
+function updEditor(){
+  const ta=document.getElementById('ed-area'),v=ta.value;
+  const lines=v.split('\n').length;
+  document.getElementById('ed-lines').textContent=Array.from({length:lines},(_,i)=>i+1).join('\n');
+  document.getElementById('ed-chars').textContent=v.length;
+  const pos=ta.selectionStart,before=v.substring(0,pos);
+  document.getElementById('ed-line').textContent=before.split('\n').length;
+  document.getElementById('ed-col').textContent=before.split('\n').pop().length+1;
+  document.getElementById('ed-saved').textContent='● Non sauvegardé';
+  document.getElementById('ed-saved').style.color='#f59e0b';
+}
+function syncScroll(){const ta=document.getElementById('ed-area');document.getElementById('ed-lines').scrollTop=ta.scrollTop;}
+document.addEventListener('DOMContentLoaded',()=>{document.getElementById('ed-area')?.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const ta=e.target,s=ta.selectionStart,end=ta.selectionEnd;ta.value=ta.value.substring(0,s)+'  '+ta.value.substring(end);ta.selectionStart=ta.selectionEnd=s+2;updEditor();}if(e.ctrlKey&&e.key==='s'){e.preventDefault();saveFile();}});});
+function fileCtx(e,i){e.preventDefault();const f=VFS[i];showCtx(e.clientX,e.clientY,[{label:'📄 Ouvrir dans l\'éditeur',fn:()=>openFileEditor(i)},{label:'✏️ Renommer',fn:()=>{const n=prompt('Nouveau nom :',f.n);if(n){VFS[i].n=n;saveFS(VFS);renderF(VFS);}}},{sep:true},{label:'🗑️ Supprimer',fn:()=>{if(confirm('Supprimer '+f.n+' ?')){VFS.splice(i,1);saveFS(VFS);renderF(VFS);ntf('Fichiers',f.n+' supprimé');}}}]);}
+function showCtx(x,y,items){const c=document.getElementById('ctx');c.innerHTML=items.map(it=>it.sep?'<div class="ctxsep"></div>':`<div class="ctxi" onclick="closeCtx();(${it.fn.toString()})()">${it.label}</div>`).join('');c.style.left=Math.min(x,window.innerWidth-170)+'px';c.style.top=Math.min(y,window.innerHeight-items.length*34)+'px';c.style.display='block';}
+function closeCtx(){document.getElementById('ctx').style.display='none';}
+document.addEventListener('click',closeCtx);
+
+// ══ TERMINAL ══
+let trmHistory=[],trmHIdx=-1,zramOnT=false,installedPkgs=['nex-zram','nexai'];
+let trmCwd='/home/user';
+function trmKey(e){
+  const inp=document.getElementById('trm-inp');
+  if(e.key==='Enter'){const cmd=inp.value.trim();if(cmd){trmHistory.unshift(cmd);trmHIdx=-1;runCmd(cmd);}inp.value='';}
+  else if(e.key==='ArrowUp'){trmHIdx=Math.min(trmHIdx+1,trmHistory.length-1);if(trmHistory[trmHIdx])inp.value=trmHistory[trmHIdx];e.preventDefault();}
+  else if(e.key==='ArrowDown'){trmHIdx=Math.max(trmHIdx-1,-1);inp.value=trmHIdx<0?'':trmHistory[trmHIdx];e.preventDefault();}
+  else if(e.key==='Tab'){e.preventDefault();const v=inp.value;const cmds=['nex','zram','ls','cat','cd','pwd','echo','clear','help','nano','whoami','uname','df','free','top','reboot','shutdown','mkdir','rm','touch','nexsearch','nexai','lsblk','mount','persist','nexa','date','ping'];const m=cmds.filter(c=>c.startsWith(v));if(m.length===1)inp.value=m[0]+' ';}
+}
+function trmPrint(html){const out=document.getElementById('trm-out');const d=document.createElement('div');d.className='tl';d.innerHTML=html;out.appendChild(d);out.scrollTop=9999;}
+function trmPrompt(){document.getElementById('trm-prompt').textContent='nexos@live '+trmCwd+' $';}
+function runCmd(raw){
+  trmPrint(`<span class="tp">nexos@live ${trmCwd} $</span> <span class="tc">${raw.replace(/</g,'&lt;')}</span>`);
+  const parts=raw.trim().split(/\s+/);const cmd=parts[0],args=parts.slice(1);
+  switch(cmd){
+    case 'help':
+      trmPrint('<span class="thl">Commandes NEXOS v0.2 :</span>');
+      [['nex install/remove/list/update','Gestionnaire de paquets'],['zram start/stop/status','Gestion ZRAM'],['lsblk','Périphériques de stockage'],['mount','Systèmes montés'],['persist on/off','Mode persistance USB'],['ls [path]','Lister fichiers'],['cat <fichier>','Afficher fichier'],['nano <fichier>','Éditeur NEXOS'],['cd / pwd / whoami','Navigation'],['uname -a','Info système'],['df -h / free -h','Espace & RAM'],['top','Processus actifs'],['date','Date et heure'],['nexsearch <termes>','Lancer NEXSEARCH'],['nexai <message>','Parler à NEX AI'],['nexa post <msg>','Poster sur NEXA'],['reboot / shutdown','Redémarrer / Éteindre']].forEach(([c,d])=>trmPrint(`  <span style="color:#818cf8;font-family:'JetBrains Mono'">${c.padEnd(28)}</span><span class="to">${d}</span>`));
+      break;
+    case 'clear':document.getElementById('trm-out').innerHTML='';return;
+    case 'pwd':trmPrint(`<span class="to">${trmCwd}</span>`);break;
+    case 'whoami':trmPrint(`<span class="to">${document.getElementById('unameInp')?.value||'user'}</span>`);break;
+    case 'date':trmPrint(`<span class="to">${new Date().toString()}</span>`);break;
+    case 'uname':trmPrint(`<span class="to">Linux nexos-live 6.1.0-nex #1 SMP PREEMPT x86_64 GNU/Linux</span>`);break;
+    case 'lsblk':
+      trmPrint('<span class="thl">NAME      SIZE TYPE MOUNTPOINT</span>');
+      trmPrint('<span class="to">sda       32G  disk</span>');
+      trmPrint('<span class="to">├─sda1    28G  part /               ← NEXOS Live USB</span>');
+      trmPrint('<span class="to">└─sda2    4G   part /casper-rw      ← Persistance</span>');
+      trmPrint('<span class="to">sdb       256G disk                  ← Disque hôte (non touché)</span>');
+      break;
+    case 'mount':
+      trmPrint('<span class="thl">Systèmes de fichiers montés :</span>');
+      trmPrint('<span class="to">/dev/sda1 on / type ext4 (ro,relatime)</span>');
+      trmPrint('<span class="to">/dev/sda2 on /casper-rw type ext4 (rw) [persistance]</span>');
+      trmPrint('<span class="to">tmpfs on /tmp type tmpfs (rw)</span>');
+      trmPrint('<span class="tok">✓ Disque dur hôte (sdb) non monté</span>');
+      break;
+    case 'persist':
+      if(args[0]==='on'){trmPrint('<span class="tok">✓ Persistance activée — /dev/sda2 (casper-rw)</span>');ntf('USB','Persistance activée');}
+      else if(args[0]==='off'){trmPrint('<span class="tw">⚠ Persistance désactivée — session temporaire</span>');}
+      else{trmPrint('<span class="tok">✓ Persistance active — /dev/sda2 (casper-rw) — 4.0GB</span>');}
+      break;
+    case 'cd':{const target=args[0]||'/home/user';const paths={'~':'/home/user','/home/user':'/home/user','/etc':'/etc','/etc/nexos':'/etc/nexos','/var':'/var','/var/log':'/var/log','/usr':'/usr','/usr/nex':'/usr/nex','/boot':'/boot','/casper-rw':'/casper-rw'};const resolved=target==='~'?'/home/user':target.startsWith('/')?target:trmCwd+'/'+target;trmCwd=resolved;trmPrompt();break;}
+    case 'ls':{const path=args[0]||trmCwd;const files=VFS.filter(f=>f.p===path+'/'||f.p===path);if(files.length){const row=files.map(f=>`<span style="color:${f.t==='nex'?'#a78bfa':f.t==='code'?'#60a5fa':f.t==='doc'?'#10b981':'rgba(255,255,255,.7)'}">${f.n}</span>`).join('  ');trmPrint(row);}else{trmPrint(`<span class="to">drwxr-xr-x  docs/  nex/  img/</span>`);}break;}
+    case 'cat':{if(!args[0]){trmPrint('<span class="te">cat: manque un argument</span>');break;}const f=VFS.find(x=>x.n===args[0]||x.p+x.n===args[0]||x.p+x.n===(trmCwd+'/'+args[0]));if(f){f.content.split('\n').forEach(l=>trmPrint(`<span class="to">${l.replace(/</g,'&lt;')}</span>`));}else trmPrint(`<span class="te">cat: ${args[0]}: introuvable</span>`);break;}
+    case 'nano':case 'vi':case 'vim':{if(!args[0]){trmPrint(`<span class="te">${cmd}: manque un nom de fichier</span>`);break;}const idx=VFS.findIndex(x=>x.n===args[0]||x.p+x.n===args[0]||x.p+x.n===(trmCwd+'/'+args[0]));if(idx>=0){openFileEditor(idx);trmPrint(`<span class="tok">✓ Ouverture dans l'éditeur NEXOS</span>`);}else{const nf={n:args[0],p:trmCwd+'/',t:'doc',s:'0 B',d:'Auj.',i:'📄',content:''};VFS.push(nf);saveFS(VFS);renderF(VFS);openFileEditor(VFS.length-1);trmPrint(`<span class="tok">✓ Nouveau fichier créé : ${args[0]}</span>`);}break;}
+    case 'nex':{const sub=args[0];if(!sub){trmPrint('<span class="te">Usage: nex &lt;install|remove|list|update|search&gt;</span>');break;}
+      if(sub==='list'){trmPrint('<span class="thl">Paquets installés :</span>');installedPkgs.forEach(p=>trmPrint(`<span class="tok">✓</span> <span class="to"> ${p.padEnd(22)} installé</span>`));}
+      else if(sub==='install'){const pkg=args[1];if(!pkg){trmPrint('<span class="te">Usage: nex install &lt;paquet&gt;</span>');break;}if(installedPkgs.includes(pkg)){trmPrint(`<span class="tw">⚠ ${pkg} est déjà installé</span>`);break;}trmPrint(`<span class="to">Résolution des dépendances...</span>`);setTimeout(()=>trmPrint(`<span class="to">Téléchargement de ${pkg}...</span>`),300);setTimeout(()=>trmPrint(`<span class="to">Installation en cours...</span>`),700);setTimeout(()=>{installedPkgs.push(pkg);trmPrint(`<span class="tok">✓ ${pkg} installé sur USB</span>`);trmPrint('');trmPrompt();ntf('NEX',''+pkg+' installé !');},1200);return;}
+      else if(sub==='remove'){const pkg=args[1];if(!pkg){trmPrint('<span class="te">Usage: nex remove &lt;paquet&gt;</span>');break;}const i=installedPkgs.indexOf(pkg);if(i<0){trmPrint(`<span class="te">${pkg} n'est pas installé</span>`);}else{installedPkgs.splice(i,1);trmPrint(`<span class="tok">✓ ${pkg} désinstallé</span>`);ntf('NEX',pkg+' désinstallé');}}
+      else if(sub==='update'){trmPrint('<span class="to">Mise à jour de l\'index NEX...</span>');setTimeout(()=>{trmPrint('<span class="tok">✓ Tout est à jour</span>');trmPrint('');trmPrompt();},800);return;}
+      else if(sub==='search'){const q=args[1];if(!q){trmPrint('<span class="te">Usage: nex search &lt;terme&gt;</span>');break;}PKGS.filter(p=>p.n.includes(q)).forEach(p=>trmPrint(`  <span class="thl">${p.n}</span> <span class="to">${p.d}</span>`));}
+      else trmPrint(`<span class="te">nex: sous-commande inconnue '${sub}'</span>`);
+      break;}
+    case 'zram':{const sub=args[0]||'status';
+      if(sub==='status'){if(zramOnT){trmPrint('<span class="tok">✓ ZRAM actif (lz4)</span>');trmPrint('<span class="to">  /dev/zram0  512M  lz4  68%</span>');trmPrint('<span class="to">  /dev/zram1  512M  lz4  45%</span>');}else trmPrint('<span class="tw">⚠ ZRAM inactif</span>');}
+      else if(sub==='start'){const algo=(args.find(a=>a.startsWith('--algo='))||'--algo=lz4').split('=')[1];trmPrint(`<span class="to">Démarrage ZRAM (${algo})...</span>`);setTimeout(()=>{zramOnT=true;trmPrint('<span class="tok">✓ /dev/zram0 créé (512MB)</span>');trmPrint('<span class="tok">✓ /dev/zram1 créé (512MB)</span>');trmPrint('<span class="tok">✓ ZRAM actif — +1.2GB RAM libérés</span>');document.getElementById('zind').style.display='';trmPrint('');trmPrompt();ntf('ZRAM','Activé — +1.2GB');},600);return;}
+      else if(sub==='stop'){zramOnT=false;trmPrint('<span class="tw">⚠ ZRAM désactivé</span>');document.getElementById('zind').style.display='none';}
+      else trmPrint(`<span class="te">zram: inconnu '${sub}'</span>`);
+      break;}
+    case 'df':trmPrint('<span class="thl">Système de fichiers     Taille   Utilisé   Dispo</span>');trmPrint('<span class="to">/dev/sda1 (USB)         28G      8.2G      19G</span>');trmPrint('<span class="to">/dev/sda2 (persist)     4G       1.2G      2.8G</span>');trmPrint('<span class="to">tmpfs                   2.0G     0         2.0G</span>');trmPrint('<span class="to">/dev/zram0              512M     348M      164M</span>');break;
+    case 'free':trmPrint('<span class="thl">              total    utilisé    libre</span>');trmPrint('<span class="to">Mem:          4.0G     1.2G       2.8G</span>');trmPrint('<span class="to">ZRAM:         1.2G     580M       640M</span>');trmPrint('<span class="to">Total:        5.2G     1.8G       3.4G</span>');break;
+    case 'top':trmPrint('<span class="thl">PID   COMMAND          CPU%   MEM%</span>');[['1','systemd','0.0','0.3'],['312','nexui','2.1','4.2'],['418','nexsearch','0.8','1.1'],['502','nexai','1.2','2.4'],['611','nex-zram','0.1','0.2'],['720','nexa','0.3','1.8']].forEach(([p,c,cp,mp])=>trmPrint(`<span class="to">${p.padEnd(6)}${c.padEnd(17)}${cp.padEnd(7)}${mp}</span>`));break;
+    case 'ping':trmPrint(`<span class="to">PING ${args[0]||'google.com'}: 32 bytes — 23ms</span>`);break;
+    case 'echo':trmPrint(`<span class="to">${args.join(' ')}</span>`);break;
+    case 'mkdir':if(!args[0])trmPrint('<span class="te">mkdir: manque un argument</span>');else trmPrint(`<span class="tok">✓ Répertoire créé : ${args[0]}</span>`);break;
+    case 'touch':if(!args[0]){trmPrint('<span class="te">touch: manque un argument</span>');break;}if(!VFS.find(f=>f.n===args[0])){VFS.push({n:args[0],p:trmCwd+'/',t:'doc',s:'0 B',d:'Auj.',i:'📄',content:''});saveFS(VFS);renderF(VFS);}trmPrint(`<span class="tok">✓ ${args[0]}</span>`);break;
+    case 'rm':{if(!args[0]){trmPrint('<span class="te">rm: manque un argument</span>');break;}const ri=VFS.findIndex(f=>f.n===args[0]);if(ri>=0){VFS.splice(ri,1);saveFS(VFS);renderF(VFS);trmPrint(`<span class="tok">✓ ${args[0]} supprimé</span>`);}else trmPrint(`<span class="te">rm: ${args[0]}: introuvable</span>`);break;}
+    case 'nexsearch':document.getElementById('nsq').value=args.join(' ');openW('ws');doSearch();trmPrint(`<span class="tok">✓ Recherche : "${args.join(' ')}"</span>`);break;
+    case 'nexai':document.getElementById('aii').value=args.join(' ');openW('wa');sendAI();trmPrint(`<span class="tok">✓ Message envoyé à NEX AI</span>`);break;
+    case 'nexa':{if(args[0]==='post'&&args.slice(1).join(' ')){nxPostText(args.slice(1).join(' '));trmPrint(`<span class="tok">✓ Publié sur NEXA</span>`);}else{trmPrint('<span class="to">NEXA Social — réseau communautaire NEXOS</span>');trmPrint('  <span class="to">nexa post &lt;message&gt;</span> — publier un message');}break;}
+    case 'reboot':trmPrint('<span class="tw">Redémarrage...');setTimeout(()=>shutdown(),1000);break;
+    case 'shutdown':trmPrint('<span class="tw">Arrêt...</span>');setTimeout(()=>shutdown(),1000);break;
+    default:trmPrint(`<span class="te">nexos: commande introuvable: '${cmd}'. Tape 'help'.</span>`);
+  }
+  trmPrint('');trmPrompt();
+}
+
+// ══ ZRAM WINDOW ══
+let zOn=false,zA='lz4';
+function togZ(){
+  zOn=!zOn;
+  const bg=document.getElementById('zbg'),tg=document.getElementById('ztg'),ind=document.getElementById('zind');
+  if(zOn){bg.textContent='ON';bg.className='zba on';tg.textContent='Désactiver';tg.className='ztg on';document.getElementById('zbt').textContent='Actif — '+zA;ind.style.display='';document.getElementById('zg').textContent='+1.2 GB';document.getElementById('zrt').textContent='ratio: 2.8:1';document.getElementById('zu').textContent='0.8 GB';document.getElementById('zbar').style.width='20%';document.getElementById('zdl').innerHTML='<div class="dit"><span class="dn">/dev/zram0</span><span class="ds2">512 MB</span><div class="db"><div class="db2" style="width:68%"></div></div><span class="dp">68%</span></div><div class="dit"><span class="dn">/dev/zram1</span><span class="ds2">512 MB</span><div class="db"><div class="db2" style="width:45%"></div></div><span class="dp">45%</span></div>';document.getElementById('ramv')&&(document.getElementById('ramv').textContent='0.8G');zramOnT=true;ntf('ZRAM','Activé ('+zA+') — +1.2GB libérés');}
+  else{bg.textContent='OFF';bg.className='zba off';tg.textContent='Activer';tg.className='ztg off';document.getElementById('zbt').textContent='ZRAM inactif';ind.style.display='none';document.getElementById('zg').textContent='—';document.getElementById('zrt').textContent='ratio: —';document.getElementById('zu').textContent='1.2 GB';document.getElementById('zbar').style.width='30%';document.getElementById('zdl').innerHTML='<div style="font-size:11px;color:rgba(255,255,255,.17);padding:5px 0;">Aucun périphérique actif</div>';zramOnT=false;ntf('ZRAM','Désactivé');}
+}
+function setA(el,a){zA=a;document.querySelectorAll('.ab').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
+function applyZ(){if(!zOn){ntf('ZRAM','Active ZRAM d\'abord !');return;}ntf('ZRAM','Config '+zA+' sauvegardée → /etc/nexos/zram.conf');}
+
+// ══ NEX STORE ══
+const PKGS=[
+  {n:'nex-zram',d:'Compression RAM temps réel',v:'2.0.1',cat:'sys',ic:'⚡',col:'linear-gradient(135deg,#0ea5e9,#6366f1)',installed:true},
+  {n:'nexai-core',d:'Moteur IA local hors ligne',v:'1.4.0',cat:'ia',ic:'◉',col:'linear-gradient(135deg,#059669,#0d9488)',installed:false},
+  {n:'nexa-social',d:'Réseau social NEXOS',v:'2.1.0',cat:'dev',ic:'◆',col:'linear-gradient(135deg,#db2777,#9333ea)',installed:true},
+  {n:'nexsearch-pro',d:'Index local + offline',v:'1.2.0',cat:'dev',ic:'⌕',col:'linear-gradient(135deg,#4f46e5,#7c3aed)',installed:false},
+  {n:'nex-filemanager',d:'Gestionnaire de fichiers avancé',v:'1.0.3',cat:'sys',ic:'▦',col:'linear-gradient(135deg,#d97706,#b45309)',installed:false},
+  {n:'nex-network',d:'Gestionnaire réseau',v:'0.9.1',cat:'sys',ic:'🌐',col:'linear-gradient(135deg,#0891b2,#0284c7)',installed:false},
+  {n:'nexai-local',d:'IA embarquée (quantized)',v:'0.5.0',cat:'ia',ic:'🧠',col:'linear-gradient(135deg,#7c3aed,#6366f1)',installed:false},
+  {n:'nex-usb-clone',d:'Cloner la clé USB NEXOS',v:'1.1.0',cat:'usb',ic:'💾',col:'linear-gradient(135deg,#0d9488,#0ea5e9)',installed:false},
+  {n:'nex-usb-encrypt',d:'Chiffrement AES-256 USB',v:'1.0.0',cat:'usb',ic:'🔒',col:'linear-gradient(135deg,#6366f1,#8b5cf6)',installed:false},
+  {n:'nex-persist-mgr',d:'Gestion partition persistante',v:'1.2.1',cat:'usb',ic:'🔌',col:'linear-gradient(135deg,#059669,#0d9488)',installed:true},
+];
+
+// ══ GAMES HUB ══
+const GAMES=[
+  {t:'RetroArch',d:'Multi-émulateur rétro (NES, SNES, Genesis)',c:'emulators',ic:'👾',col:'linear-gradient(135deg,#db2777,#f43f5e)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'PCSX2',d:'Émulateur PlayStation 2',c:'emulators',ic:'🎮',col:'linear-gradient(135deg,#0891b2,#06b6d4)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'Dolphin',d:'Émulateur Wii & GameCube',c:'emulators',ic:'🐬',col:'linear-gradient(135deg,#4f46e5,#7c3aed)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'Citra',d:'Émulateur Nintendo 3DS',c:'emulators',ic:'📱',col:'linear-gradient(135deg,#ec4899,#f43f5e)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'SuperTuxKart',d:'Jeu de course 3D gratuit',c:'casual',ic:'🏎️',col:'linear-gradient(135deg,#10b981,#34d399)',rating:'⭐⭐⭐⭐',inst:true},
+  {t:'Tuxracer',d:'Jeu de ski amusant pour Linux',c:'casual',ic:'⛷️',col:'linear-gradient(135deg,#3b82f6,#60a5fa)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'Flightgear',d:'Simulateur de vol réaliste',c:'casual',ic:'✈️',col:'linear-gradient(135deg,#f59e0b,#fbbf24)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'Minetest',d:'Sandbox creatif inspiré Minecraft',c:'casual',ic:'⛏️',col:'linear-gradient(135deg,#059669,#10b981)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'0 A.D.',d:'Jeu stratégie temps réel gratuit',c:'indie',ic:'⚔️',col:'linear-gradient(135deg,#7c3aed,#a78bfa)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'Veloren',d:'RPG multijoueur voxel',c:'indie',ic:'🗻',col:'linear-gradient(135deg,#d97706,#f97316)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'Blender',d:'Suite 3D complète (modeling, animation)',c:'tools',ic:'🎨',col:'linear-gradient(135deg,#ea580c,#f97316)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'GIMP',d:'Éditeur d\'images puissant',c:'tools',ic:'🖼️',col:'linear-gradient(135deg,#6b21a8,#7c3aed)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'OBS Studio',d:'Enregistreur d\'écran / Streaming',c:'tools',ic:'📹',col:'linear-gradient(135deg,#0ea5e9,#06b6d4)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'Inkscape',d:'Éditeur graphique vectoriel',c:'tools',ic:'✏️',col:'linear-gradient(135deg,#f59e0b,#d97706)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'Audacity',d:'Éditeur audio professionnel',c:'tools',ic:'🎵',col:'linear-gradient(135deg,#3b82f6,#1e40af)',rating:'⭐⭐⭐⭐',inst:false},
+  {t:'Krita',d:'Application dessin numérique',c:'tools',ic:'🎭',col:'linear-gradient(135deg,#db2777,#be185d)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'OpenRCT2',d:'Jeu gestion parc d\'attractions',c:'indie',ic:'🎡',col:'linear-gradient(135deg,#10b981,#059669)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'Godot Engine',d:'Moteur de jeu open-source',c:'tools',ic:'🎮',col:'linear-gradient(135deg,#4f46e5,#6366f1)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'Valve Games',d:'Portal, Half-Life 2, Team Fortress 2 (Steam)',c:'action',ic:'🎯',col:'linear-gradient(135deg,#1f2937,#374151)',rating:'⭐⭐⭐⭐⭐',inst:false},
+  {t:'Lutris',d:'Gestionnaire de jeux multi-plateformes',c:'tools',ic:'🎪',col:'linear-gradient(135deg,#fbbf24,#f59e0b)',rating:'⭐⭐⭐⭐',inst:false},
+];
+let gamesFilter='all';
+function renderStore(){
+  const q=document.getElementById('store-search')?.value.toLowerCase()||'';
+  let list=PKGS;
+  if(storeFilter!=='all')list=list.filter(p=>p.cat===storeFilter);
+  if(q)list=list.filter(p=>p.n.includes(q)||p.d.toLowerCase().includes(q));
+  document.getElementById('store-list').innerHTML=list.map((p)=>`<div class="pi"><div class="pic2" style="background:${p.col}">${p.ic}</div><div class="pin"><div class="pn">${p.n}</div><div class="pd">${p.d}</div><div class="pv">v${p.v}</div></div>${p.installed?'<div class="ib2 done">✓ Installé</div>':`<div class="ib2" onclick="instP(${PKGS.indexOf(p)})">Installer</div>`}</div>`).join('');
+}
+function storeTab(t,el){storeFilter=t;document.querySelectorAll('.sc2').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderStore();}
+function filterStore(){renderStore();}
+function instP(i){const p=PKGS[i];if(p.installed)return;ntf('NEX Store','Installation de '+p.n+'...');installedPkgs.push(p.n);setTimeout(()=>{p.installed=true;renderStore();ntf('NEX Store',p.n+' installé sur USB !');},1200);}
+
+// ══ GAMES FUNCTIONS ══
+function renderGames(){
+  const q=document.getElementById('games-search')?.value.toLowerCase()||'';
+  let list=GAMES;
+  if(gamesFilter!=='all')list=list.filter(g=>g.c===gamesFilter);
+  if(q)list=list.filter(g=>g.t.toLowerCase().includes(q)||g.d.toLowerCase().includes(q));
+  document.getElementById('games-list').innerHTML=list.map((g,i)=>`<div class="game-card" ondblclick="instGame(${GAMES.indexOf(g)})"><div class="game-icon" style="background:${g.col}">${g.ic}</div><div class="game-title">${g.t}</div><div class="game-cat">${g.c==='emulators'?'Émulateur':g.c==='casual'?'Casual':g.c==='indie'?'Indie':g.c==='action'?'Action':g.c==='tools'?'Outil':'Jeu'}</div><div class="game-desc">${g.d}</div><div class="game-rating">${g.rating}</div><button class="game-btn ${g.c==='tools'?'inst':''} ${g.inst?'done':''}" onclick="instGame(${GAMES.indexOf(g)})">${g.inst?'✓ Installé':g.c==='tools'?'Ouvrir':'Jouer'}</button></div>`).join('');
+}
+function gamesTab(t,el){gamesFilter=t;document.querySelectorAll('#games-cats .sc2').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderGames();}
+function filterGames(){renderGames();}
+function instGame(i){const g=GAMES[i];if(g.inst)return;ntf('Games Hub','Lancement de '+g.t+'...');setTimeout(()=>{g.inst=true;renderGames();ntf('Games Hub',g.t+' lancé !');window.open('https://'+g.t.toLowerCase().replace(/\s+/g,'-')+'.com','_blank');},400);}
+
+// ══ PARAMÈTRES ══
+function cfgNav(s,el){document.querySelectorAll('.cfgni').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.cfgs').forEach(x=>x.classList.remove('on'));el.classList.add('on');document.getElementById('cfg-'+s).classList.add('on');}
+function updG(){const k=document.getElementById('gkey').value.trim(),b=document.getElementById('gst');if(k.startsWith('gsk_')&&k.length>20){b.textContent='✓ Clé valide';b.className='badge bok';}else if(k.length){b.textContent='⚠ Format invalide';b.className='badge ber';}else{b.textContent='✗ Aucune clé';b.className='badge ber';}}
+function saveG(){const k=document.getElementById('gkey').value.trim(),m=document.getElementById('gmod').value,p=document.getElementById('gper').value;if(!k.startsWith('gsk_')){ntf('Paramètres','Clé invalide — doit commencer par gsk_');return;}ST.gkey=k;ST.gmod=m;ST.gper=p;localStorage.setItem('nx-gkey',k);localStorage.setItem('nx-gmod',m);localStorage.setItem('nx-gper',p);document.getElementById('gst').textContent='✓ Sauvegardée';document.getElementById('gst').className='badge bok';document.getElementById('aitag').textContent='ON';ntf('NEX AI','Clé Groq sauvegardée — '+m+' actif !');}
+function generateQuiz(){const topic=document.getElementById('quiz-topic').value.trim()||'général';const level=document.getElementById('quiz-level').value;const count=Math.min(10,Math.max(1,Number(document.getElementById('quiz-count').value)||5));const out=document.getElementById('quiz-output');const questions=[];for(let i=1;i<=count;i++){questions.push(`Q${i}. (${level}) ${topic} — Question ${i} ?\nRéponse ${i}.`);}out.textContent='Sujet : '+topic+' — Niveau : '+level+'\n\n'+questions.join('\n\n');openW('wquiz');ntf('Quiz Maker','Quiz généré — '+count+' questions');}
+function savePW(){const np=document.getElementById('npw').value,cp=document.getElementById('cpw').value;if(!np){ntf('Compte','Entre un nouveau mot de passe');return;}if(np!==cp){ntf('Compte','Mots de passe différents');return;}ST.pw=np;localStorage.setItem('nx-pw',np);document.getElementById('npw').value='';document.getElementById('cpw').value='';ntf('Compte','Mot de passe changé !');}
+
+// ══ NEX AI ══
+let aiH=[],offI=0;
+const offR=['Configure ta clé Groq dans Paramètres → NEX AI.','ZRAM actif, ratio 2.8:1 avec lz4.','Tape "nex list" dans le terminal.','NEXOS tourne en mode Live USB — rien installé sur le PC hôte.','La persistance est active sur /dev/sda2 (casper-rw).','NEXA Social est le réseau communautaire de NEXOS.'];
+async function sendAI(){
+  const inp=document.getElementById('aii'),q=inp.value.trim();if(!q)return;
+  inp.value='';
+  const aib=document.getElementById('aib'),air=aib.querySelector('.air');
+  const ud=document.createElement('div');ud.className='am';ud.style.flexDirection='row-reverse';
+  ud.innerHTML=`<div class="aav" style="background:rgba(99,102,241,.25)">E</div><div class="ab2" style="background:rgba(99,102,241,.08);border-color:rgba(99,102,241,.18)">${q}</div>`;
+  aib.insertBefore(ud,air);
+  const td=document.createElement('div');td.className='am';
+  td.innerHTML=`<div class="aav" style="background:linear-gradient(135deg,#059669,#0d9488)">N</div><div class="ab2"><span style="color:var(--m);font-style:italic">Réflexion...</span></div>`;
+  aib.insertBefore(td,air);aib.scrollTop=9999;
+  const key=ST.gkey,model=ST.gmod,persona=ST.gper;
+  if(key&&key.startsWith('gsk_')){
+    aiH.push({role:'user',content:q});
+    try{
+      const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model,messages:[{role:'system',content:persona},...aiH.slice(-10)],max_tokens:500,temperature:0.7})});
+      const data=await r.json();
+      if(data.choices?.[0]){const rep=data.choices[0].message.content;aiH.push({role:'assistant',content:rep});td.querySelector('.ab2').innerHTML=rep.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>');}
+      else throw new Error(data.error?.message||'Erreur API');
+    }catch(e){td.querySelector('.ab2').innerHTML='<span style="color:#f59e0b">⚠ '+e.message+'</span>';}
+  }else{setTimeout(()=>{td.querySelector('.ab2').textContent=offR[offI%offR.length];offI++;},650);}
+  aib.scrollTop=9999;
+}
+
+// ══ NEXA SOCIAL ══
+const NEXA_POSTS=[
+  {user:'nex_dev',avatar:'👨‍💻',color:'linear-gradient(135deg,#4f46e5,#7c3aed)',tag:'Dev',tagColor:'rgba(99,102,241,.2)',tagTxt:'#818cf8',time:'il y a 5 min',body:'NEXOS v0.2 est out ! 🔌 Nouveau : USB Manager, NEXA Social intégré, terminal v2. Testez et partagez !',likes:24,liked:false,comments:8},
+  {user:'penguin_42',avatar:'🐧',color:'linear-gradient(135deg,#059669,#0d9488)',tag:'USB',tagColor:'rgba(16,185,129,.15)',tagTxt:'#34d399',time:'il y a 12 min',body:'Mon vieux PC de 2012 tourne parfaitement NEXOS depuis la clé USB. Incroyable que ça marche sur ce hardware. RAM : 2GB, CPU : Core 2 Duo. ZRAM sauve la mise !',code:'$ zram start --algo=lz4\n✓ +1.2GB RAM libérés\n✓ CPU : 3% overhead',likes:18,liked:false,comments:5},
+  {user:'alice_nex',avatar:'🦊',color:'linear-gradient(135deg,#db2777,#f43f5e)',tag:'Tip',tagColor:'rgba(244,63,94,.15)',tagTxt:'#f87171',time:'il y a 28 min',body:'Astuce : mettez NEXOS sur une clé USB 3.0 et activez le mode "toram" pour une rapidité maximale. Démarrage en 3s sur mon Thinkpad !',likes:41,liked:false,comments:12},
+  {user:'raspi_guy',avatar:'🍓',color:'linear-gradient(135deg,#be185d,#9333ea)',tag:'RPi',tagColor:'rgba(147,51,234,.15)',tagTxt:'#a78bfa',time:'il y a 1h',body:'NEXOS tourne sur mon Raspberry Pi 4 (4GB). NEXA Social charge en <500ms, NEX AI répond en ~200ms avec Groq. Le mode USB live sur Pi c\'est game changer.',likes:33,liked:false,comments:7},
+  {user:'nex_core',avatar:'⚡',color:'linear-gradient(135deg,#0ea5e9,#6366f1)',tag:'Update',tagColor:'rgba(14,165,233,.15)',tagTxt:'#38bdf8',time:'il y a 2h',body:'NEX Store v1.2 : Nouvelle catégorie USB. Ajout de nex-usb-clone, nex-usb-encrypt, et nex-persist-mgr. Mettez à jour avec `nex update` !',code:'$ nex update\n✓ Index mis à jour — 3 nouveaux paquets',likes:67,liked:false,comments:22},
+];
+const NEXA_LOCAL=[
+  {user:'system',avatar:'🖥',color:'rgba(255,255,255,.1)',tag:'Système',tagColor:'rgba(16,185,129,.1)',tagTxt:'#34d399',time:'maintenant',body:'Session NEXOS Live démarrée. Booting depuis USB_NEXOS_32GB. Persistance active sur /dev/sda2.',likes:0,liked:false,comments:0},
+];
+const NEXA_NEX=[
+  {user:'nexos_bot',avatar:'🤖',color:'linear-gradient(135deg,#6366f1,#8b5cf6)',tag:'Release',tagColor:'rgba(99,102,241,.15)',tagTxt:'#818cf8',time:'il y a 2h',body:'🚀 NEXOS v0.2.0 — Changelog :\n• USB Manager intégré\n• NEXA Social v2\n• Terminal enrichi (lsblk, mount, persist)\n• NEX Store : catégorie USB\n• Boot USB amélioré — détection auto',likes:128,liked:false,comments:34},
+  {user:'nex_dev',avatar:'👨‍💻',color:'linear-gradient(135deg,#4f46e5,#7c3aed)',tag:'Roadmap',tagColor:'rgba(99,102,241,.15)',tagTxt:'#818cf8',time:'il y a 1 jour',body:'Roadmap v0.3 :\n→ NEX Sync : synchronisation cloud USB\n→ NEX Shield : VPN intégré\n→ Multiboot : plusieurs OS sur une clé\n→ NEXOS Mobile (Android)',likes:89,liked:false,comments:19},
+];
+let nxPostCount=0;
+function nxTab(t){['feed','local','nex','me'].forEach(x=>{document.getElementById('nxp-'+x).classList.toggle('on',x===t);document.getElementById('nxtb-'+x).classList.toggle('on',x===t);});}
+function renderNxFeed(posts,containerId){
+  document.getElementById(containerId).innerHTML=posts.map((p,i)=>`
+    <div class="nxpost">
+      <div class="nxph">
+        <div class="nxav" style="background:${p.color}">${p.avatar}</div>
+        <div><div class="nxun">${p.user}</div><div class="nxts">${p.time}</div></div>
+        <div class="nxtag" style="background:${p.tagColor};color:${p.tagTxt};border:1px solid ${p.tagTxt}33;font-size:10px;padding:2px 7px;border-radius:10px;">${p.tag}</div>
+      </div>
+      <div class="nxbody">${p.body.replace(/\n/g,'<br>')}</div>
+      ${p.code?`<div class="nxcode">${p.code.replace(/\n/g,'<br>').replace(/✓/g,'<span style="color:#10b981">✓</span>').replace(/\$/g,'<span style="color:#818cf8">$</span>')}</div>`:''}
+      <div class="nxact">
+        <button class="nxa ${p.liked?'liked':''}" onclick="nxLike(${i},'${containerId}',${posts===NEXA_POSTS?0:posts===NEXA_LOCAL?1:2})">♥ ${p.likes}</button>
+        <button class="nxa" onclick="ntf('NEXA','${p.comments} commentaires')">💬 ${p.comments}</button>
+        <button class="nxa" onclick="ntf('NEXA','Lien copié')">↗ Partager</button>
+      </div>
+    </div>`).join('');
+}
+const feedData=[NEXA_POSTS,NEXA_LOCAL,NEXA_NEX];
+const feedIds=['nxfeed-list','nxfeed-local','nxfeed-nex'];
+function nxLike(i,containerId,feedIdx){feedData[feedIdx][i].liked=!feedData[feedIdx][i].liked;feedData[feedIdx][i].likes+=feedData[feedIdx][i].liked?1:-1;renderNxFeed(feedData[feedIdx],containerId);}
+function nxPost(){const t=document.getElementById('nxci').value.trim();if(!t)return;nxPostText(t);document.getElementById('nxci').value='';}
+function nxPostText(t){
+  const user=document.getElementById('unameInp')?.value||'user';
+  NEXA_POSTS.unshift({user,avatar:'🐧',color:'linear-gradient(135deg,#4f46e5,#7c3aed)',tag:'Post',tagColor:'rgba(99,102,241,.15)',tagTxt:'#818cf8',time:'maintenant',body:t,likes:0,liked:false,comments:0});
+  nxPostCount++;document.getElementById('nx-posts').textContent=nxPostCount;
+  renderNxFeed(NEXA_POSTS,'nxfeed-list');ntf('NEXA','Post publié !');
+}
+function initNexa(){renderNxFeed(NEXA_POSTS,'nxfeed-list');renderNxFeed(NEXA_LOCAL,'nxfeed-local');renderNxFeed(NEXA_NEX,'nxfeed-nex');}
+
+// ══ USB MANAGER ══
+let persistActive=true;
+function togPersist(btn){persistActive=!persistActive;btn.classList.toggle('on',persistActive);ntf('USB',persistActive?'Persistance activée — sauvegarde sur USB':'Persistance désactivée — session temporaire');}
+function usbSync(){ntf('USB','Synchronisation en cours...');setTimeout(()=>ntf('USB','✓ Données sauvegardées sur USB (casper-rw)'),1400);}
+function usbEject(){if(!confirm('Éjecter la clé USB ? NEXOS s\'arrêtera.'))return;ntf('USB','Arrêt sécurisé en cours...');setTimeout(()=>shutdown(),2000);}
+
+// ══ CONTEXT MENU BUREAU ══
+document.getElementById('da')?.addEventListener('contextmenu',e=>{
+  if(e.target.closest('.di'))return;
+  e.preventDefault();
+  showCtx(e.clientX,e.clientY,[
+    {label:'📄 Nouveau fichier',fn:()=>newFile()},
+    {label:'📁 Nouveau dossier',fn:()=>ntf('Fichiers','Bientôt disponible')},
+    {sep:true},
+    {label:'🔄 Actualiser',fn:()=>{renderF(VFS);renderStore();}},
+    {label:'🔌 USB Manager',fn:()=>openW('wusb')},
+    {label:'⚙️ Paramètres',fn:()=>openW('wc')},
+  ]);
+});
+</script>
+</body>
+</html
