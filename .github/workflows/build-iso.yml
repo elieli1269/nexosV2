@@ -20,8 +20,16 @@ jobs:
       
       - name: Install build dependencies
         run: |
-          sudo apt update
-          sudo apt install -y live-build debootstrap xorriso syslinux-utils isolinux rsync genisoimage squashfs-tools
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends \
+            live-build \
+            debootstrap \
+            xorriso \
+            syslinux-utils \
+            isolinux \
+            rsync \
+            genisoimage \
+            squashfs-tools
       
       - name: Configure sudo for live-build
         run: |
@@ -38,8 +46,8 @@ jobs:
           echo "---- build.sh content ----"
           sed -n '1,200p' build.sh || true
           chmod +x build.sh
-          timeout 3600 bash -x ./build.sh 2>&1 | tee build.log
-          tail -n 300 build.log
+          timeout 3600 bash -eux -o pipefail ./build.sh 2>&1 | tee build.log
+          tail -n 300 build.log || true
       
       - name: Locate ISO artifact
         if: always()
@@ -47,8 +55,8 @@ jobs:
         run: |
           set -eux
           cd nexos-live || exit 2
-          # find the first hybrid ISO produced by live-build
-          find . -type f -name '*hybrid.iso' -print | tee iso_list.txt || true
+          # find the most likely ISO produced by live-build (hybrid or plain .iso)
+          find . -type f \( -name '*hybrid.iso' -o -name '*.iso' \) -print | sort -r | tee iso_list.txt || true
           ISO_REL=$(head -n1 iso_list.txt || true)
           if [ -n "$ISO_REL" ]; then
             ISO_ABS="$PWD/$ISO_REL"
@@ -57,6 +65,14 @@ jobs:
           else
             echo "No ISO found in nexos-live"
           fi
+
+      - name: Upload nexos-live folder for debugging
+        if: always() && env.ISO_PATH == ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexos-live-tree
+          path: nexos-live
+          retention-days: 7
 
       - name: Upload ISO artifact
         if: always() && env.ISO_PATH != ''
