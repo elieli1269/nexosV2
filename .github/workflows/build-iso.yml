@@ -38,10 +38,11 @@ jobs:
           echo "---- build.sh content ----"
           sed -n '1,200p' build.sh || true
           chmod +x build.sh
-          timeout 3600 bash -x ./build.sh 2>&1 | tee build.log || true
-          tail -n 300 build.log || true
+          timeout 3600 bash -x ./build.sh 2>&1 | tee build.log
+          tail -n 300 build.log
       
       - name: Locate ISO artifact
+        if: always()
         id: locate_iso
         run: |
           set -eux
@@ -58,7 +59,7 @@ jobs:
           fi
 
       - name: Upload ISO artifact
-        if: env.ISO_PATH != ''
+        if: always() && env.ISO_PATH != ''
         uses: actions/upload-artifact@v4
         with:
           name: nexos-iso
@@ -66,7 +67,7 @@ jobs:
           retention-days: 30
 
       - name: Upload build log when no ISO
-        if: env.ISO_PATH == ''
+        if: always() && env.ISO_PATH == ''
         uses: actions/upload-artifact@v4
         with:
           name: build-log
