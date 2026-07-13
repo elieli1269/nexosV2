@@ -70,30 +70,58 @@ jobs:
         run: |
           set -eux
           cd nexos-live || exit 2
-          echo "---- top-level files in nexos-live ----"
-          find . -maxdepth 1 -type f | sort | tee file_list.txt || true
-          echo "---- looking for ISO artifacts ----"
-          find . -maxdepth 1 -type f \( -name '*hybrid.iso' -o -name '*.iso' \) -print | sort -r | tee iso_list.txt || true
-          ISO_REL=$(head -n1 iso_list.txt || true)
-          ISO_REL=${ISO_REL#./}
-          if [ -n "$ISO_REL" ]; then
-            ISO_ABS="$PWD/$ISO_REL"
+          echo "---- Directory structure (first 30 items) ----"
+          find . -type f | head -30 | sort || true
+          echo ""
+          echo "---- Searching for all .iso files (recursive) ----"
+          find . -type f -name '*.iso' -print | sort || true
+          echo ""
+          echo "---- Searching for all .hybrid.iso files ----"
+          find . -type f -name '*.hybrid.iso' -print | sort || true
+          echo ""
+          ISO=$(find . -type f -name '*.hybrid.iso' -print -quit 2>/dev/null || true)
+          if [ -z "$ISO" ]; then
+            ISO=$(find . -type f -name '*.iso' -print -quit 2>/dev/null || true)
+          fi
+          if [ -n "$ISO" ]; then
+            ISO_ABS="$(cd "$(dirname "$ISO")" && pwd)/$(basename "$ISO")"
             echo "ISO_PATH=$ISO_ABS" >> $GITHUB_ENV
             echo "Found ISO: $ISO_ABS"
+            ls -lh "$ISO_ABS"
           else
-            echo "No ISO found in nexos-live"
+            echo "No ISO found in nexos-live directory tree"
+            echo "ISO_PATH=" >> $GITHUB_ENV
           fi
 
       - name: Upload build log when no ISO
-        if: always() && env.ISO_PATH == ''
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-log
           path: nexos-live/build.log
           retention-days: 7
 
+      - name: Debug upload directory listing
+        if: always()
+        run: |
+          cd nexos-live
+          echo "=== Complete directory tree ===" > /tmp/dir_listing.txt
+          find . -type f -name '*.iso' -o -type f -name '*.img' >> /tmp/dir_listing.txt 2>&1 || true
+          echo "" >> /tmp/dir_listing.txt
+          echo "=== All files with details ===" >> /tmp/dir_listing.txt
+          find . -type f | xargs ls -lh >> /tmp/dir_listing.txt 2>&1 || true
+          cat /tmp/dir_listing.txt
+
+      - name: Upload directory listing debug
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: directory-listing
+          path: /tmp/dir_listing.txt
+          retention-days: 7
+
       - name: Upload ISO artifact
-        if: always() && env.ISO_PATH != ''
+        if: env.ISO_PATH != ''
         uses: actions/upload-artifact@v4
         with:
           name: nexos-iso
