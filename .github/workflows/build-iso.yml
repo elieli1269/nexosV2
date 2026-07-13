@@ -31,7 +31,7 @@ jobs:
       
       - name: Prepare & Build NEXOS ISO (debug enabled)
         run: |
-          set -euxo pipefail
+          set -eux
           ls -la
           if [ ! -d "nexos-live" ]; then echo "nexos-live directory not found"; exit 2; fi
           cd nexos-live
@@ -39,8 +39,18 @@ jobs:
           echo "---- build.sh content ----"
           sed -n '1,200p' build.sh || true
           chmod +x build.sh
-          timeout 3600 bash -x ./build.sh 2>&1 | tee build.log || true
-          tail -n 300 build.log || true
+          echo "---- Starting build ----"
+          set +e
+          timeout 3600 bash -x ./build.sh 2>&1 | tee build.log
+          BUILD_EXIT=$?
+          set -e
+          echo "---- Build exit code: $BUILD_EXIT ----"
+          if [ $BUILD_EXIT -ne 0 ]; then
+            echo "Build FAILED! Showing last 500 lines of output:"
+            tail -n 500 build.log || true
+          fi
+          tail -n 100 build.log || true
+          exit $BUILD_EXIT
       
       - name: Locate ISO artifact
         if: always()
