@@ -2,14 +2,26 @@
 set -e
 cd "$(dirname "$0")"
 
+echo "=== Environment ==="
+whoami
+pwd
+df -h
+ls -la
+
 UI_SRC="index.html"
 UI_DST="config/includes.chroot/usr/share/nexos-ui/index.html"
 
+echo "=== Preparing UI ==="
 mkdir -p "$(dirname "$UI_DST")"
 cp -r -f "$UI_SRC" "$(dirname "$UI_DST")"
 cp -f nexos-launch.sh config/includes.chroot/usr/local/bin/nexos-launch.sh
 chmod +x config/includes.chroot/usr/local/bin/nexos-launch.sh
 
+echo "=== Cleaning previous builds ==="
+rm -rf cache/ chroot/ build/ *.iso *.log 2>/dev/null || true
+
+echo "=== Configuring live-build ==="
+lb clean --all || true
 lb config \
   --distribution jammy \
   --architecture amd64 \
@@ -17,8 +29,22 @@ lb config \
   --binary-images iso-hybrid \
   --apt-indices true \
   --debian-installer false \
+  --memtest none \
   --bootappend-live "boot=live components persistence"
 
+echo "=== Running lb build ==="
+set -x
 sudo lb build
+set +x
 
-echo "Build complete: $(pwd)/live-image-amd64.hybrid.iso"
+echo "=== Build complete, checking for ISO ==="
+ls -lh
+echo "=== Looking for .iso files ==="
+find . -type f -name '*.iso' -exec ls -lh {} \;
+if [ -f "live-image-amd64.hybrid.iso" ]; then
+  echo "SUCCESS: Found live-image-amd64.hybrid.iso"
+  ls -lh live-image-amd64.hybrid.iso
+else
+  echo "ERROR: live-image-amd64.hybrid.iso not found!"
+  exit 1
+fi
