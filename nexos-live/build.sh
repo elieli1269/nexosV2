@@ -10,6 +10,9 @@ cp -r -f "$UI_SRC" "$(dirname "$UI_DST")"
 cp -f nexos-launch.sh config/includes.chroot/usr/local/bin/nexos-launch.sh
 chmod +x config/includes.chroot/usr/local/bin/nexos-launch.sh
 
+echo "=== Listing config structure ==="
+find config -type f | head -30 | sort
+
 lb config \
   --distribution jammy \
   --architecture amd64 \
@@ -19,13 +22,20 @@ lb config \
   --debian-installer false \
   --bootappend-live "boot=live components persistence"
 
-# Remove any leftover build chroot or stray ISO files that can confuse live-build
+echo "=== Pre-cleanup: checking for problematic files ==="
 if [ -d "chroot" ]; then
-  echo "Removing stale chroot/ directory to avoid invalid include patterns"
+  echo "Found stale chroot/ directory - removing"
   rm -rf chroot || true
 fi
-find . -maxdepth 2 -type f -name "memtest86+.iso" -print -delete || true
 
+echo "=== Searching for problematic memtest files ==="
+find . -maxdepth 2 -type f -name "memtest86+.iso" -print -delete -v || true
+
+echo "=== Checking config after cleanup ==="
+find config -name "*.iso" -o -name "*.chroot" | head -20 || true
+
+echo "=== Starting sudo lb build with debug ==="
+set -x
 sudo lb build
 
 echo "Build complete: $(pwd)/live-image-amd64.hybrid.iso"

@@ -46,8 +46,23 @@ jobs:
           echo "---- build.sh content ----"
           sed -n '1,200p' build.sh || true
           chmod +x build.sh
-          timeout 3600 bash -eux -o pipefail ./build.sh 2>&1 | tee build.log
-          tail -n 300 build.log || true
+          echo "---- System Info ----"
+          df -h || true
+          free -h || true
+          echo "---- Starting build (timeout 3600s) ----"
+          if timeout 3600 bash -eux ./build.sh 2>&1 | tee build.log; then
+            echo "Build succeeded"
+          else
+            BUILD_EXIT=$?
+            echo "Build failed with exit code: $BUILD_EXIT"
+            echo "---- Last 500 lines of build.log ----"
+            tail -n 500 build.log || true
+            echo "---- Contents of cache/ ----"
+            find cache -type f -name "*.log" -o -name "*.txt" 2>/dev/null | head -20 | xargs -I {} sh -c 'echo "=== {} ===" && head -50 {}' || true
+            echo "---- Contents of chroot/var/log/ ----"
+            find chroot/var/log -type f 2>/dev/null | head -10 | xargs -I {} sh -c 'echo "=== {} ===" && tail -30 {}' || true
+            exit $BUILD_EXIT
+          fi
       
       - name: Locate ISO artifact
         if: always()
