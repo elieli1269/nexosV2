@@ -50,6 +50,8 @@ jobs:
             tail -n 500 ../build.log || true
           fi
           tail -n 100 ../build.log || true
+          echo "==== Post-build directory listing in nexos-live ===="
+          find . -type f | sort | sed 's#^#FILE: #' || true
           exit $BUILD_EXIT
       
       - name: Locate ISO artifact
@@ -67,10 +69,10 @@ jobs:
           echo "---- Searching for all .hybrid.iso files ----"
           find . -type f -name '*.hybrid.iso' -print | sort || true
           echo ""
-          ISO=$(find . -type f -name '*.hybrid.iso' -print -quit 2>/dev/null || true)
-          if [ -z "$ISO" ]; then
-            ISO=$(find . -type f -name '*.iso' -print -quit 2>/dev/null || true)
-          fi
+          echo "---- Searching for all .iso files ----"
+          find . -type f -name '*.iso' -print | sort || true
+          echo ""
+          ISO=$(find . -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) -print -quit 2>/dev/null || true)
           if [ -n "$ISO" ]; then
             ISO_ABS="$(cd "$(dirname "$ISO")" && pwd)/$(basename "$ISO")"
             echo "ISO_PATH=$ISO_ABS" >> $GITHUB_ENV
@@ -114,6 +116,17 @@ jobs:
         with:
           name: nexos-iso
           path: ${{ env.ISO_PATH }}
+          retention-days: 30
+
+      - name: Upload any ISO artifacts found (fallback)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexos-iso-fallback
+          path: |
+            nexos-live/*.iso
+            nexos-live/**/*.iso
+          if-no-files-found: ignore
           retention-days: 30
 
       - name: Create Release
