@@ -67,12 +67,12 @@ jobs:
           find . -type f -name '*.iso' -print | sort || true
           echo ""
           echo "---- Searching for all .hybrid.iso files ----"
-          find . -type f -name '*.hybrid.iso' -print | sort || true
+          find . \( -path './cache/bootstrap/etc/ssl/private' -o -path './cache/bootstrap/etc/ssl/private/*' \) -prune -o -type f -name '*.hybrid.iso' -print 2>/dev/null | sort || true
           echo ""
           echo "---- Searching for all .iso files ----"
-          find . -type f -name '*.iso' -print | sort || true
+          find . \( -path './cache/bootstrap/etc/ssl/private' -o -path './cache/bootstrap/etc/ssl/private/*' \) -prune -o -type f -name '*.iso' -print 2>/dev/null | sort || true
           echo ""
-          ISO=$(find . -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) -print -quit 2>/dev/null || true)
+          ISO=$(find . \( -path './cache/bootstrap/etc/ssl/private' -o -path './cache/bootstrap/etc/ssl/private/*' \) -prune -o -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) -print -quit 2>/dev/null || true)
           if [ -n "$ISO" ]; then
             ISO_ABS="$(cd "$(dirname "$ISO")" && pwd)/$(basename "$ISO")"
             echo "ISO_PATH=$ISO_ABS" >> $GITHUB_ENV

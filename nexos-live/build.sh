@@ -39,8 +39,8 @@ set +x
 
 echo "=== Build complete, checking for ISO ==="
 ls -lh
-echo "=== Looking for .iso files ==="
-find . -type f -name '*.iso' -exec ls -lh {} \;
+echo "=== Looking for .iso files (excluding protected SSL private dirs) ==="
+find . \( -path './cache/bootstrap/etc/ssl/private' -o -path './cache/bootstrap/etc/ssl/private/*' \) -prune -o -type f -name '*.iso' -print -exec ls -lh {} \; 2>/dev/null
 if [ -f "live-image-amd64.hybrid.iso" ]; then
   echo "SUCCESS: Found live-image-amd64.hybrid.iso"
   ls -lh live-image-amd64.hybrid.iso
