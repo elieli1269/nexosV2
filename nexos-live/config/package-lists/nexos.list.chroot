@@ -15,3 +15,9 @@ zram-tools
 sudo
 curl
 git
+firefox
+xdg-utils
+sensible-utils
+dbus-x11
+x11-xserver-utils
+python3
