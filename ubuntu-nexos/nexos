@@ -54,31 +54,20 @@ install_nexos() {
 
   cat > "$LAUNCHER" <<'EOF'
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 export XDG_RUNTIME_DIR
 
-if [[ -n "$XDG_SESSION_TYPE" && "$XDG_SESSION_TYPE" == "wayland" ]]; then
-  if command -v chromium >/dev/null 2>&1; then
-    exec chromium --ozone-platform=wayland --no-first-run --disable-translate --disable-infobars --kiosk "file:///opt/nexos/index.html"
-  elif command -v google-chrome >/dev/null 2>&1; then
-    exec google-chrome --ozone-platform=wayland --no-first-run --disable-translate --disable-infobars --kiosk "file:///opt/nexos/index.html"
-  elif command -v firefox >/dev/null 2>&1; then
-    MOZ_ENABLE_WAYLAND=1 exec firefox --kiosk "file:///opt/nexos/index.html"
-  else
-    exec x-www-browser "file:///opt/nexos/index.html"
-  fi
+if command -v firefox >/dev/null 2>&1; then
+  exec firefox --kiosk --new-window "file:///opt/nexos/index.html"
+elif command -v chromium >/dev/null 2>&1; then
+  exec chromium --no-first-run --disable-translate --disable-infobars --kiosk "file:///opt/nexos/index.html"
+elif command -v google-chrome >/dev/null 2>&1; then
+  exec google-chrome --no-first-run --disable-translate --disable-infobars --kiosk "file:///opt/nexos/index.html"
 else
-  if command -v chromium >/dev/null 2>&1; then
-    exec chromium --no-first-run --disable-translate --disable-infobars --kiosk "file:///opt/nexos/index.html"
-  elif command -v google-chrome >/dev/null 2>&1; then
-    exec google-chrome --no-first-run --disable-translate --disable-infobars --kiosk "file:///opt/nexos/index.html"
-  elif command -v firefox >/dev/null 2>&1; then
-    exec firefox --kiosk "file:///opt/nexos/index.html"
-  else
-    exec x-www-browser "file:///opt/nexos/index.html"
-  fi
+  echo "NEXOS: no supported browser found. Install firefox or chromium." >&2
+  exit 1
 fi
 EOF
 
@@ -107,6 +96,10 @@ EOF
 
   mkdir -p "$MARKER_DIR"
   touch "$MARKER_DIR/installed"
+
+  if ! command -v firefox >/dev/null 2>&1 && ! command -v chromium >/dev/null 2>&1 && ! command -v google-chrome >/dev/null 2>&1; then
+    log "Warning: no supported browser detected. Install firefox or chromium to launch the UI."
+  fi
 
   log "Nexos installed successfully."
   log "Launch Nexos from the application menu or run: $LAUNCHER"
