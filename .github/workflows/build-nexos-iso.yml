@@ -5,148 +5,106 @@ on:
     branches:
       - main
       - develop
-    paths:
-      - 'nexos-live/**'
-      - '.github/workflows/build-nexos-iso.yml'
   pull_request:
     branches:
       - main
-      - develop
-    paths:
-      - 'nexos-live/**'
-  workflow_dispatch:  # Permet de déclencher manuellement
+  workflow_dispatch:
 
 jobs:
   build-iso:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: write
-      packages: write
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install build dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y live-build debootstrap
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq live-build debootstrap
+          lb --version
 
-      - name: Verify UI file
+      - name: Verify required files
+        working-directory: nexos-live
         run: |
-          if [ ! -f "nexos-live/index.html" ]; then
-            echo "ERROR: nexos-live/index.html not found!"
-            exit 1
-          fi
-          echo "✓ UI file found"
+          echo "Checking required files..."
+          [ -f "index.html" ] && echo "✓ index.html" || exit 1
+          [ -f "nexos-launch.sh" ] && echo "✓ nexos-launch.sh" || exit 1
 
-      - name: Prepare build directory
+      - name: Prepare build environment
+        working-directory: nexos-live
         run: |
-          cd nexos-live
-          chmod +x build.sh
           mkdir -p config/includes.chroot/usr/share/nexos-ui
           mkdir -p config/includes.chroot/usr/local/bin
+          chmod +x nexos-launch.sh
 
-      - name: Check free space
+      - name: Copy UI files
+        working-directory: nexos-live
         run: |
-          echo "=== Free Disk Space ==="
-          df -h
-
-      - name: Build ISO
-        run: |
-          cd nexos-live
-          set -e
-          
-          echo "=== Verifying required files ==="
-          [ -f "index.html" ] || { echo "ERROR: index.html not found"; exit 1; }
-          [ -f "nexos-launch.sh" ] || { echo "ERROR: nexos-launch.sh not found"; exit 1; }
-          echo "✓ All required files present"
-
-          echo "=== Preparing UI files ==="
-          mkdir -p "config/includes.chroot/usr/share/nexos-ui"
-          mkdir -p "config/includes.chroot/usr/local/bin"
           cp -f index.html config/includes.chroot/usr/share/nexos-ui/
           cp -f nexos-launch.sh config/includes.chroot/usr/local/bin/
           chmod +x config/includes.chroot/usr/local/bin/nexos-launch.sh
-          echo "✓ UI files prepared"
 
-          echo "=== Cleaning previous builds ==="
-          rm -rf cache/ chroot/ build/ *.iso *.log 2>/dev/null || true
+      - name: Clean previous builds
+        working-directory: nexos-live
+        run: |
+          rm -rf cache/ chroot/ build/ *.iso *.log *.sha256 2>/dev/null || true
+          sudo lb clean --all 2>&1 | tail -5
 
-          echo "=== Configuring live-build ==="
-          sudo lb clean --all || true
+      - name: Configure live-build
+        working-directory: nexos-live
+        run: |
           sudo lb config \
             --distribution jammy \
             --architecture amd64 \
-            --archive-areas "main universe multiverse" \
+            --archive-areas "main universe" \
             --binary-images iso-hybrid \
-            --apt-indices true \
+            --apt-indices false \
             --debian-installer false \
             --memtest none \
-            --bootappend-live "boot=live components persistence"
-          echo "✓ live-build configured"
+            --bootappend-live "boot=live components"
 
-          echo "=== Building ISO (this may take 15-20 minutes) ==="
-          sudo timeout 2700 lb build 2>&1 | tail -50 || {
-            BUILD_EXIT=$?
-            echo "Build failed with exit code: $BUILD_EXIT"
-            exit $BUILD_EXIT
-          }
-
-          echo "=== Verifying ISO ==="
+      - name: Build ISO
+        working-directory: nexos-live
+        run: |
+          echo "Starting build..."
+          df -h | head -3
+          sudo lb build 2>&1 | tee build.log
+          BUILD_EXIT=${PIPESTATUS[0]}
+          
           if [ -f "live-image-amd64.hybrid.iso" ]; then
-            SIZE=$(stat -f%z "live-image-amd64.hybrid.iso" 2>/dev/null || stat -c%s "live-image-amd64.hybrid.iso" 2>/dev/null || echo "unknown")
-            echo "✓ SUCCESS: Found live-image-amd64.hybrid.iso (size: $SIZE bytes)"
-            ls -lh live-image-amd64.hybrid.iso
+            SIZE=$(du -h live-image-amd64.hybrid.iso | cut -f1)
+            echo "✓ ISO created: $SIZE"
           else
-            echo "✗ ERROR: ISO file not found"
-            find . -maxdepth 1 -name '*.iso' 2>/dev/null && echo "Found:" || echo "No ISO files found"
+            echo "✗ ISO not found"
+            tail -50 build.log
             exit 1
           fi
 
       - name: Generate checksum
         if: success()
+        working-directory: nexos-live
         run: |
-          cd nexos-live
           sha256sum live-image-amd64.hybrid.iso > live-image-amd64.hybrid.iso.sha256
           cat live-image-amd64.hybrid.iso.sha256
 
-      - name: Upload ISO artifact
+      - name: Upload artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: nexos-iso-${{ github.ref_name }}
+          name: nexos-iso
           path: |
             nexos-live/live-image-amd64.hybrid.iso
             nexos-live/live-image-amd64.hybrid.iso.sha256
           retention-days: 30
 
-      - name: Create Release (tags only)
-        if: startsWith(github.ref, 'refs/tags/') && success()
-        uses: softprops/action-gh-release@v1
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          files: |
-            nexos-live/live-image-amd64.hybrid.iso
-            nexos-live/live-image-amd64.hybrid.iso.sha256
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Comment on PR
-        if: github.event_name == 'pull_request' && success()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '✅ ISO build successful! ISO available in artifacts.'
-            })
-
-      - name: Notify on failure
-        if: failure()
-        run: |
-          echo "❌ Build failed. Check logs above."
-          exit 1
+          name: build-logs
+          path: nexos-live/build.log
+          retention-days: 5
