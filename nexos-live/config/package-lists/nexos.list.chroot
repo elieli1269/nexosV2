@@ -1,7 +1,6 @@
 live-boot
 live-config
 locales
-locale-gen
 console-setup
 keyboard-configuration
 xorg
@@ -11,14 +10,13 @@ openbox
 lightdm
 lightdm-gtk-greeter
 network-manager
-network-manager-gnome
 alsa-utils
 zram-tools
 sudo
 curl
 git
 firefox
-chromium-browser
+chromium
 xdg-utils
 sensible-utils
 dbus-x11
@@ -27,4 +25,3 @@ x11-utils
 python3
 python3-pip
 ca-certificates
-net-tools

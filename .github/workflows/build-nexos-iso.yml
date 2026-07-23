@@ -44,29 +44,31 @@ jobs:
         run: |
           cd nexos-live
           chmod +x build.sh
-          # Préparation des répertoires
           mkdir -p config/includes.chroot/usr/share/nexos-ui
           mkdir -p config/includes.chroot/usr/local/bin
+
+      - name: Check free space
+        run: |
+          echo "=== Free Disk Space ==="
+          df -h
 
       - name: Build ISO
         run: |
           cd nexos-live
-          # Adapter le script pour GitHub Actions (sudo automatique pour lb)
           set -e
-          echo "=== Environment ==="
-          whoami
-          pwd
-          df -h
-          ls -la
+          
+          echo "=== Verifying required files ==="
+          [ -f "index.html" ] || { echo "ERROR: index.html not found"; exit 1; }
+          [ -f "nexos-launch.sh" ] || { echo "ERROR: nexos-launch.sh not found"; exit 1; }
+          echo "✓ All required files present"
 
-          UI_SRC="index.html"
-          UI_DST="config/includes.chroot/usr/share/nexos-ui/index.html"
-
-          echo "=== Preparing UI ==="
-          mkdir -p "$(dirname "$UI_DST")"
-          cp -r -f "$UI_SRC" "$(dirname "$UI_DST")"
-          cp -f nexos-launch.sh config/includes.chroot/usr/local/bin/nexos-launch.sh
+          echo "=== Preparing UI files ==="
+          mkdir -p "config/includes.chroot/usr/share/nexos-ui"
+          mkdir -p "config/includes.chroot/usr/local/bin"
+          cp -f index.html config/includes.chroot/usr/share/nexos-ui/
+          cp -f nexos-launch.sh config/includes.chroot/usr/local/bin/
           chmod +x config/includes.chroot/usr/local/bin/nexos-launch.sh
+          echo "✓ UI files prepared"
 
           echo "=== Cleaning previous builds ==="
           rm -rf cache/ chroot/ build/ *.iso *.log 2>/dev/null || true
@@ -82,18 +84,23 @@ jobs:
             --debian-installer false \
             --memtest none \
             --bootappend-live "boot=live components persistence"
+          echo "✓ live-build configured"
 
-          echo "=== Running lb build ==="
-          sudo lb build
+          echo "=== Building ISO (this may take 15-20 minutes) ==="
+          sudo timeout 2700 lb build 2>&1 | tail -50 || {
+            BUILD_EXIT=$?
+            echo "Build failed with exit code: $BUILD_EXIT"
+            exit $BUILD_EXIT
+          }
 
-          echo "=== Build complete, checking for ISO ==="
-          ls -lh
-          find . -type f -name '*.iso' -print -exec ls -lh {} \; 2>/dev/null || true
+          echo "=== Verifying ISO ==="
           if [ -f "live-image-amd64.hybrid.iso" ]; then
-            echo "✓ SUCCESS: Found live-image-amd64.hybrid.iso"
+            SIZE=$(stat -f%z "live-image-amd64.hybrid.iso" 2>/dev/null || stat -c%s "live-image-amd64.hybrid.iso" 2>/dev/null || echo "unknown")
+            echo "✓ SUCCESS: Found live-image-amd64.hybrid.iso (size: $SIZE bytes)"
             ls -lh live-image-amd64.hybrid.iso
           else
-            echo "✗ ERROR: live-image-amd64.hybrid.iso not found!"
+            echo "✗ ERROR: ISO file not found"
+            find . -maxdepth 1 -name '*.iso' 2>/dev/null && echo "Found:" || echo "No ISO files found"
             exit 1
           fi
 
