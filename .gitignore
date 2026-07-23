@@ -1,0 +1,24 @@
+# Nexos Live Build artifacts
+nexos-live/cache/
+nexos-live/chroot/
+nexos-live/build/
+nexos-live/*.iso
+nexos-live/*.iso.sha256
+nexos-live/*.log
+
+# General build files
+.DS_Store
+*.pyc
+__pycache__/
+.env
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

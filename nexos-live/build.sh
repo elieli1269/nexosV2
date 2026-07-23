@@ -8,11 +8,33 @@ pwd
 df -h
 ls -la
 
+# Vérifier les prérequis
+echo "=== Checking prerequisites ==="
+if ! command -v lb &> /dev/null; then
+    echo "ERROR: live-build is not installed!"
+    echo "Install with: sudo apt update && sudo apt install live-build"
+    exit 1
+fi
+echo "✓ live-build found"
+
+if [ ! -f "index.html" ]; then
+    echo "ERROR: index.html not found in $(pwd)"
+    exit 1
+fi
+echo "✓ index.html found"
+
+if [ ! -f "nexos-launch.sh" ]; then
+    echo "ERROR: nexos-launch.sh not found in $(pwd)"
+    exit 1
+fi
+echo "✓ nexos-launch.sh found"
+
 UI_SRC="index.html"
 UI_DST="config/includes.chroot/usr/share/nexos-ui/index.html"
 
 echo "=== Preparing UI ==="
 mkdir -p "$(dirname "$UI_DST")"
+mkdir -p config/includes.chroot/usr/local/bin
 cp -r -f "$UI_SRC" "$(dirname "$UI_DST")"
 cp -f nexos-launch.sh config/includes.chroot/usr/local/bin/nexos-launch.sh
 chmod +x config/includes.chroot/usr/local/bin/nexos-launch.sh
