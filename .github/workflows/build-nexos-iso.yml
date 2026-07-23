@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Install build dependencies
         run: |
@@ -74,12 +76,17 @@ jobs:
           df -h | head -3
           sudo lb build 2>&1 | tee build.log
           BUILD_EXIT=${PIPESTATUS[0]}
-          
+          if [ $BUILD_EXIT -ne 0 ]; then
+            echo "✗ lb build failed with exit code $BUILD_EXIT"
+            tail -50 build.log
+            exit $BUILD_EXIT
+          fi
           if [ -f "live-image-amd64.hybrid.iso" ]; then
             SIZE=$(du -h live-image-amd64.hybrid.iso | cut -f1)
             echo "✓ ISO created: $SIZE"
           else
             echo "✗ ISO not found"
+            find . -maxdepth 2 -name '*.iso' -type f 2>/dev/null || echo "No .iso found"
             tail -50 build.log
             exit 1
           fi
