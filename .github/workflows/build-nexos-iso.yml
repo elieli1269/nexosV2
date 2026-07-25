@@ -12,8 +12,8 @@ on:
 
 jobs:
   build-iso:
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
     permissions:
       contents: write
 
@@ -24,9 +24,11 @@ jobs:
           fetch-depth: 1
 
       - name: Install build dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq live-build debootstrap
+          sudo apt-get install -y -qq --no-install-recommends live-build debootstrap
           lb --version
 
       - name: Verify required files
@@ -60,14 +62,17 @@ jobs:
         working-directory: nexos-live
         run: |
           sudo lb config \
+            --mode ubuntu \
             --distribution jammy \
             --architecture amd64 \
             --archive-areas "main universe" \
             --binary-images iso-hybrid \
+            --apt-recommends false \
             --apt-indices false \
+            --debootstrap-options "--variant=minbase" \
             --debian-installer false \
             --memtest none \
-            --bootappend-live "boot=live components"
+            --bootappend-live "boot=live components splash"
 
       - name: Build ISO
         working-directory: nexos-live

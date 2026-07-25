@@ -45,14 +45,17 @@ rm -rf cache/ chroot/ build/ *.iso *.log 2>/dev/null || true
 echo "=== Configuring live-build ==="
 lb clean --all || true
 lb config \
+  --mode ubuntu \
   --distribution jammy \
   --architecture amd64 \
-  --archive-areas "main universe multiverse" \
+  --archive-areas "main universe" \
   --binary-images iso-hybrid \
-  --apt-indices true \
+  --apt-recommends false \
+  --apt-indices false \
+  --debootstrap-options "--variant=minbase" \
   --debian-installer false \
   --memtest none \
-  --bootappend-live "boot=live components persistence"
+  --bootappend-live "boot=live components splash"
 
 echo "=== Running lb build ==="
 set -x

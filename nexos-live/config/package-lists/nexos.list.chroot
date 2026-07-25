@@ -7,7 +7,6 @@ xserver-xorg
 xinit
 openbox
 lightdm
-lightdm-gtk-greeter
 network-manager
 sudo
 curl
