@@ -55,7 +55,7 @@ lb config \
   --debootstrap-options "--variant=minbase" \
   --debian-installer false \
   --memtest none \
-  --bootappend-live "boot=live components splash"
+  --bootappend-live "boot=live components"
 
 echo "=== Running lb build ==="
 set -x
