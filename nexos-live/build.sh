@@ -42,6 +42,13 @@ chmod +x config/includes.chroot/usr/local/bin/nexos-launch.sh
 echo "=== Cleaning previous builds ==="
 rm -rf cache/ chroot/ build/ *.iso *.log 2>/dev/null || true
 
+# Ensure hook scripts are executable in the live-build config tree
+echo "=== Fixing hook permissions ==="
+find config/hooks/normal -type f -name '*.hook.chroot' -print -exec chmod +x {} \; || true
+ls -l config/hooks/normal || true
+
+chmod +x build.sh || true
+
 echo "=== Configuring live-build ==="
 lb clean --all || true
 lb config \

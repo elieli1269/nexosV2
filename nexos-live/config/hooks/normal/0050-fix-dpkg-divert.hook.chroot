@@ -2,10 +2,16 @@
 # Fix dpkg-divert conflict with start-stop-daemon
 set -e
 
+TARGET="/usr/sbin/start-stop-daemon"
+DIVERTED="${TARGET}.distrib"
+
 # Best-effort cleanup for the transient divert conflict seen during live-build
-if dpkg-divert --list /usr/sbin/start-stop-daemon 2>/dev/null | grep -q "/usr/sbin/start-stop-daemon"; then
-    dpkg-divert --remove --rename /usr/sbin/start-stop-daemon >/dev/null 2>&1 || true
+if dpkg-divert --list "$TARGET" 2>/dev/null | grep -q "$TARGET"; then
+    if [ -f "$TARGET" ] && [ -f "$DIVERTED" ]; then
+        rm -f "$TARGET" >/dev/null 2>&1 || true
+    fi
+    dpkg-divert --remove --rename "$TARGET" >/dev/null 2>&1 || true
 fi
 
 # Remove the temporary backup if it exists, without failing the build
-rm -f /usr/sbin/start-stop-daemon.distrib >/dev/null 2>&1 || true
+rm -f "$DIVERTED" >/dev/null 2>&1 || true

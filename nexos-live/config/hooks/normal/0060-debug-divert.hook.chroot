@@ -1,0 +1,23 @@
+#!/bin/bash
+# Debug the start-stop-daemon divert state during chroot cleanup
+set -e
+
+TARGET="/usr/sbin/start-stop-daemon"
+DIVERTED="${TARGET}.distrib"
+
+cat <<'EOF'
+---- start-stop-daemon divert status ----
+EOF
+
+if dpkg-divert --list "$TARGET" 2>/dev/null | grep -q "$TARGET"; then
+    echo "diverted: true"
+    dpkg-divert --list "$TARGET" 2>/dev/null || true
+else
+    echo "diverted: false"
+fi
+
+ls -l "$TARGET" "$DIVERTED" 2>/dev/null || true
+
+cat <<'EOF'
+---- end debug ----
+EOF
