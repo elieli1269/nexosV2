@@ -86,6 +86,15 @@ jobs:
             echo "ISO_PATH=" >> $GITHUB_ENV
           fi
 
+      - name: Fail if no ISO was found
+        if: always()
+        run: |
+          if [ -z "${ISO_PATH:-}" ]; then
+            echo "ERROR: No ISO artifact was found after build."
+            echo "Check the build logs and directory listing artifacts for details."
+            exit 1
+          fi
+
       - name: Upload build log when no ISO
         if: always()
         uses: actions/upload-artifact@v4
