@@ -13,7 +13,7 @@ on:
 jobs:
   build-iso:
     runs-on: ubuntu-22.04
-    timeout-minutes: 90
+    timeout-minutes: 120
     permissions:
       contents: write
 
@@ -29,15 +29,18 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends live-build debootstrap
+          sudo apt-get install -y -qq --no-install-recommends \
+            live-build debootstrap dpkg-dev
           lb --version
+          echo "✓ Build tools installed"
 
       - name: Verify required files
         working-directory: nexos-live
         run: |
           echo "Checking required files..."
-          [ -f "index.html" ] && echo "✓ index.html" || exit 1
-          [ -f "nexos-launch.sh" ] && echo "✓ nexos-launch.sh" || exit 1
+          [ -f "index.html" ] && echo "✓ index.html" || (echo "✗ index.html missing" && exit 1)
+          [ -f "nexos-launch.sh" ] && echo "✓ nexos-launch.sh" || (echo "✗ nexos-launch.sh missing" && exit 1)
+          [ -d "config/hooks/normal" ] && echo "✓ config/hooks/normal" || (echo "✗ config/hooks/normal missing" && exit 1)
 
       - name: Prepare build environment
         working-directory: nexos-live
@@ -45,6 +48,7 @@ jobs:
           mkdir -p config/includes.chroot/usr/share/nexos-ui
           mkdir -p config/includes.chroot/usr/local/bin
           chmod +x nexos-launch.sh
+          echo "✓ Build directories prepared"
 
       - name: Copy UI files
         working-directory: nexos-live
@@ -52,17 +56,29 @@ jobs:
           cp -f index.html config/includes.chroot/usr/share/nexos-ui/
           cp -f nexos-launch.sh config/includes.chroot/usr/local/bin/
           chmod +x config/includes.chroot/usr/local/bin/nexos-launch.sh
+          echo "✓ UI files copied"
+
+      - name: Verify hook scripts
+        working-directory: nexos-live
+        run: |
+          echo "Checking hook scripts..."
+          find config/hooks/normal -type f -name '*.hook.chroot' -exec chmod +x {} \;
+          ls -lh config/hooks/normal/
+          echo "✓ Hooks are executable"
 
       - name: Clean previous builds
         working-directory: nexos-live
         run: |
           rm -rf cache/ chroot/ build/ *.iso *.log *.sha256 2>/dev/null || true
-          sudo lb clean --all 2>&1 | tail -5
+          sudo lb clean --all 2>&1 || echo "Note: lb clean returned non-zero (may be OK)"
+          df -h | head -3
+          echo "✓ Previous builds cleaned"
 
       - name: Configure live-build
         working-directory: nexos-live
         run: |
-          sudo lb config \
+          echo "Configuring live-build..."
+          lb config \
             --mode ubuntu \
             --distribution jammy \
             --architecture amd64 \
@@ -74,26 +90,47 @@ jobs:
             --debian-installer false \
             --memtest none \
             --bootappend-live "boot=live components splash"
+          echo "✓ live-build configured"
+
+      - name: Verify configuration
+        working-directory: nexos-live
+        run: |
+          echo "Verifying live-build configuration..."
+          ls -la config/ | head -20
+          [ -f "config/bootstrap" ] && echo "✓ config/bootstrap exists" || echo "⚠ config/bootstrap not found"
 
       - name: Build ISO
         working-directory: nexos-live
         run: |
-          echo "Starting build..."
+          echo "Starting ISO build (this may take 30-60 minutes)..."
           df -h | head -3
-          sudo lb build 2>&1 | tee build.log
-          BUILD_EXIT=${PIPESTATUS[0]}
-          if [ $BUILD_EXIT -ne 0 ]; then
+          echo "---"
+          
+          # Run the build with comprehensive error handling
+          if sudo lb build 2>&1 | tee build.log; then
+            echo "✓ lb build completed successfully"
+          else
+            BUILD_EXIT=$?
             echo "✗ lb build failed with exit code $BUILD_EXIT"
-            tail -50 build.log
+            echo "=== Last 100 lines of build log ==="
+            tail -100 build.log
             exit $BUILD_EXIT
           fi
+
+      - name: Verify ISO was created
+        working-directory: nexos-live
+        run: |
+          echo "Checking for ISO output..."
           if [ -f "live-image-amd64.hybrid.iso" ]; then
             SIZE=$(du -h live-image-amd64.hybrid.iso | cut -f1)
             echo "✓ ISO created: $SIZE"
+            ls -lh live-image-amd64.hybrid.iso
           else
-            echo "✗ ISO not found"
-            find . -maxdepth 2 -name '*.iso' -type f 2>/dev/null || echo "No .iso found"
-            tail -50 build.log
+            echo "✗ ISO not found at expected location"
+            echo "=== Searching for any .iso files ==="
+            find . -maxdepth 3 -name '*.iso' -type f 2>/dev/null || echo "No .iso files found"
+            echo "=== Last 50 lines of build log ==="
+            tail -50 build.log || true
             exit 1
           fi
 
@@ -101,7 +138,9 @@ jobs:
         if: success()
         working-directory: nexos-live
         run: |
+          echo "Generating checksums..."
           sha256sum live-image-amd64.hybrid.iso > live-image-amd64.hybrid.iso.sha256
+          echo "✓ Checksum generated"
           cat live-image-amd64.hybrid.iso.sha256
 
       - name: Upload artifact
@@ -114,10 +153,18 @@ jobs:
             nexos-live/live-image-amd64.hybrid.iso.sha256
           retention-days: 30
 
-      - name: Upload logs
+      - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build-logs
+          name: build-logs-${{ github.run_id }}
           path: nexos-live/build.log
           retention-days: 5
+
+      - name: Cleanup workspace
+        if: always()
+        working-directory: nexos-live
+        run: |
+          echo "Cleaning up workspace..."
+          rm -rf cache/ chroot/ build/ 2>/dev/null || true
+          du -h . --max-depth=1 | sort -h

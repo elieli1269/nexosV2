@@ -2,10 +2,17 @@ live-boot
 live-config
 locales
 console-setup
+keyboard-configuration
 xorg
+xserver-xorg
+xinit
 openbox
 lightdm
+lightdm-gtk-greeter
 network-manager
+alsa-utils
+zram-tools
 sudo
 curl
+git
 ca-certificates

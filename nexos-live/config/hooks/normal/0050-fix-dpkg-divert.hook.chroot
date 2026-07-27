@@ -1,17 +1,23 @@
 #!/bin/bash
 # Fix dpkg-divert conflict with start-stop-daemon
-set -e
+# This hook is executed during the chroot phase to resolve persistent dpkg-divert conflicts
 
 TARGET="/usr/sbin/start-stop-daemon"
 DIVERTED="${TARGET}.distrib"
 
-# Best-effort cleanup for the transient divert conflict seen during live-build
+echo "[dpkg-divert fix] Checking for start-stop-daemon conflict..."
+
+# List all current diverts for debugging
+echo "[dpkg-divert fix] Current diversions:"
+dpkg-divert --list 2>/dev/null | grep -i start-stop || echo "[dpkg-divert fix] No start-stop-daemon diversion found"
+
+# Check and remove any existing diversion
 if dpkg-divert --list "$TARGET" 2>/dev/null | grep -q "$TARGET"; then
-    if [ -f "$TARGET" ] && [ -f "$DIVERTED" ]; then
-        rm -f "$TARGET" >/dev/null 2>&1 || true
-    fi
-    dpkg-divert --remove --rename "$TARGET" >/dev/null 2>&1 || true
+    echo "[dpkg-divert fix] Removing existing diversion..."
+    dpkg-divert --remove --rename "$TARGET" 2>/dev/null || echo "[dpkg-divert fix] Failed to remove diversion (non-fatal)"
 fi
 
-# Remove the temporary backup if it exists, without failing the build
-rm -f "$DIVERTED" >/dev/null 2>&1 || true
+# Clean up orphaned files
+rm -f "$TARGET" "$DIVERTED" 2>/dev/null || true
+
+echo "[dpkg-divert fix] Verification complete"
