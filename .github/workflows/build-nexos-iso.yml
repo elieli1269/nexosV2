@@ -28,11 +28,21 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends \
-            live-build debootstrap dpkg-dev
-          lb --version
-          echo "✓ Build tools installed"
+          echo "Updating package list..."
+          sudo apt-get update -qq || (echo "❌ apt update failed"; exit 1)
+          echo "✓ Package list updated"
+          
+          echo ""
+          echo "Installing live-build and dependencies..."
+          sudo apt-get install -y --no-install-recommends \
+            live-build debootstrap dpkg-dev 2>&1 | grep -E "(Setting up|already|done|Unpacking)" || true
+          
+          echo ""
+          echo "Verifying installation..."
+          lb --version || (echo "❌ lb not found after install"; exit 1)
+          which live-build
+          which debootstrap
+          echo "✓ All build tools installed successfully"
 
       - name: Verify required files
         working-directory: nexos-live
@@ -69,10 +79,14 @@ jobs:
       - name: Clean previous builds
         working-directory: nexos-live
         run: |
+          echo "Cleaning previous build artifacts..."
           rm -rf cache/ chroot/ build/ *.iso *.log *.sha256 2>/dev/null || true
-          sudo lb clean --all 2>&1 || echo "Note: lb clean returned non-zero (may be OK)"
+          echo "Removing live-build configuration..."
+          sudo lb clean --all 2>&1 || echo "⚠ lb clean failed or lb not available (may be OK on first run)"
+          echo ""
+          echo "Disk space available:"
           df -h | head -3
-          echo "✓ Previous builds cleaned"
+          echo "✓ Workspace cleaned"
 
       - name: Configure live-build
         working-directory: nexos-live
