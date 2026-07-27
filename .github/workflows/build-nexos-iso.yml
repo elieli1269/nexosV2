@@ -35,13 +35,15 @@ jobs:
           echo ""
           echo "Installing live-build and dependencies..."
           sudo apt-get install -y --no-install-recommends \
-            live-build debootstrap dpkg-dev 2>&1 | grep -E "(Setting up|already|done|Unpacking)" || true
+            live-build debootstrap dpkg-dev xorriso syslinux-utils isolinux rsync genisoimage squashfs-tools 2>&1 | grep -E "(Setting up|already|done|Unpacking)" || true
           
           echo ""
           echo "Verifying installation..."
           lb --version || (echo "❌ lb not found after install"; exit 1)
           which live-build
           which debootstrap
+          which xorriso || echo "⚠ xorriso not found"
+          which mksquashfs || echo "⚠ squashfs-tools not found"
           echo "✓ All build tools installed successfully"
 
       - name: Verify required files
