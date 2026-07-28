@@ -59,7 +59,6 @@ lb config \
   --binary-images iso-hybrid \
   --apt-recommends false \
   --apt-indices false \
-  --debootstrap-options "--variant=minbase" \
   --debian-installer false \
   --memtest none \
   --bootappend-live "boot=live components splash" \
