@@ -170,17 +170,14 @@ jobs:
         run: |
           echo "Checking for ISO output..."
           find . -maxdepth 4 -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) | sort
-          if [ -f "live-image-amd64.hybrid.iso" ]; then
-            SIZE=$(du -h live-image-amd64.hybrid.iso | cut -f1)
-            echo "✓ ISO created: $SIZE"
-            ls -lh live-image-amd64.hybrid.iso
+          ISO_FILE=$(find . -maxdepth 4 -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) | head -n 1 || true)
+          if [ -n "$ISO_FILE" ]; then
+            ISO_PATH=$(pwd)/$ISO_FILE
+            echo "ISO_PATH=$ISO_PATH" >> $GITHUB_ENV
+            SIZE=$(du -h "$ISO_FILE" | cut -f1)
+            echo "✓ ISO created: $ISO_PATH ($SIZE)"
+            ls -lh "$ISO_FILE"
           else
-            ISO_FILE=$(find . -maxdepth 4 -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) | head -n 1 || true)
-            if [ -n "$ISO_FILE" ]; then
-              echo "✓ ISO found at: $ISO_FILE"
-              ls -lh "$ISO_FILE"
-              exit 0
-            fi
             echo "✗ ISO not found at expected location"
             echo "=== Searching for any .iso files ==="
             find . -maxdepth 4 -name '*.iso' -type f 2>/dev/null || echo "No .iso files found"
@@ -193,10 +190,11 @@ jobs:
         if: success()
         working-directory: nexos-live
         run: |
-          echo "Generating checksums..."
-          sha256sum live-image-amd64.hybrid.iso > live-image-amd64.hybrid.iso.sha256
-          echo "✓ Checksum generated"
-          cat live-image-amd64.hybrid.iso.sha256
+          echo "Generating checksum for ISO: $ISO_PATH"
+          CHECKSUM_FILE="${ISO_PATH}.sha256"
+          sha256sum "$ISO_PATH" > "$CHECKSUM_FILE"
+          echo "✓ Checksum generated: $CHECKSUM_FILE"
+          cat "$CHECKSUM_FILE"
 
       - name: Upload artifact
         if: success()
@@ -204,8 +202,8 @@ jobs:
         with:
           name: nexos-iso
           path: |
-            nexos-live/live-image-amd64.hybrid.iso
-            nexos-live/live-image-amd64.hybrid.iso.sha256
+            ${{ env.ISO_PATH }}
+            ${{ env.ISO_PATH }}.sha256
           retention-days: 30
 
       - name: Upload build logs
