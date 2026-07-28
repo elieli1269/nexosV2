@@ -31,17 +31,24 @@ jobs:
           echo "Updating package list..."
           sudo apt-get update -qq || (echo "❌ apt update failed"; exit 1)
           echo "✓ Package list updated"
-          
+
           echo ""
           echo "Installing live-build and dependencies..."
           sudo apt-get install -y --no-install-recommends \
-            live-build debootstrap dpkg-dev xorriso syslinux-utils isolinux rsync genisoimage squashfs-tools 2>&1 | grep -E "(Setting up|already|done|Unpacking)" || true
-          
+            live-build debootstrap dpkg-dev xorriso syslinux-utils isolinux rsync genisoimage squashfs-tools \
+            > install-deps.log 2>&1
+          if [ $? -ne 0 ]; then
+            echo "✗ Dependency installation failed"
+            tail -n 80 install-deps.log || true
+            exit 1
+          fi
+          echo "✓ Dependencies installed"
+
           echo ""
           echo "Verifying installation..."
           lb --version || (echo "❌ lb not found after install"; exit 1)
-          which live-build
-          which debootstrap
+          which live-build || true
+          which debootstrap || true
           which xorriso || echo "⚠ xorriso not found"
           which mksquashfs || echo "⚠ squashfs-tools not found"
           echo "✓ All build tools installed successfully"
@@ -162,14 +169,21 @@ jobs:
         working-directory: nexos-live
         run: |
           echo "Checking for ISO output..."
+          find . -maxdepth 4 -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) | sort
           if [ -f "live-image-amd64.hybrid.iso" ]; then
             SIZE=$(du -h live-image-amd64.hybrid.iso | cut -f1)
             echo "✓ ISO created: $SIZE"
             ls -lh live-image-amd64.hybrid.iso
           else
+            ISO_FILE=$(find . -maxdepth 4 -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) | head -n 1 || true)
+            if [ -n "$ISO_FILE" ]; then
+              echo "✓ ISO found at: $ISO_FILE"
+              ls -lh "$ISO_FILE"
+              exit 0
+            fi
             echo "✗ ISO not found at expected location"
             echo "=== Searching for any .iso files ==="
-            find . -maxdepth 3 -name '*.iso' -type f 2>/dev/null || echo "No .iso files found"
+            find . -maxdepth 4 -name '*.iso' -type f 2>/dev/null || echo "No .iso files found"
             echo "=== Last 50 lines of build log ==="
             tail -50 build.log || true
             exit 1

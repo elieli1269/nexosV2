@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euxo pipefail
 cd "$(dirname "$0")"
 
 echo "=== Environment ==="
@@ -66,17 +66,27 @@ lb config \
 
 echo "=== Running lb build ==="
 set -x
-sudo lb build
+sudo lb build 2>&1 | tee build.log
+BUILD_EXIT=${PIPESTATUS[0]}
 set +x
+
+if [ "$BUILD_EXIT" -ne 0 ]; then
+  echo "✗ lb build failed with exit code $BUILD_EXIT"
+  echo "=== Last 100 lines of build.log ==="
+  tail -100 build.log || true
+  exit "$BUILD_EXIT"
+fi
 
 echo "=== Build complete, checking for ISO ==="
 ls -lh
 echo "=== Looking for .iso files (excluding protected SSL private dirs) ==="
-find . \( -path './cache/bootstrap/etc/ssl/private' -o -path './cache/bootstrap/etc/ssl/private/*' \) -prune -o -type f -name '*.iso' -print -exec ls -lh {} \; 2>/dev/null
-if [ -f "live-image-amd64.hybrid.iso" ]; then
-  echo "SUCCESS: Found live-image-amd64.hybrid.iso"
-  ls -lh live-image-amd64.hybrid.iso
+find . \( -path './cache/bootstrap/etc/ssl/private' -o -path './cache/bootstrap/etc/ssl/private/*' \) -prune -o -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) -print -exec ls -lh {} \; 2>/dev/null
+ISO_FILE=$(find . -maxdepth 4 -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) | head -n 1 || true)
+if [ -n "$ISO_FILE" ]; then
+  echo "SUCCESS: Found ISO at $ISO_FILE"
+  ls -lh "$ISO_FILE"
+  exit 0
 else
-  echo "ERROR: live-image-amd64.hybrid.iso not found!"
+  echo "ERROR: no ISO file found after build"
   exit 1
 fi
