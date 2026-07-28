@@ -105,9 +105,7 @@ jobs:
           lb --version
           echo ""
           echo "Running lb config with comprehensive output..."
-          set -x
-          sudo lb config \
-            --mode ubuntu \
+          FLAGS=(--mode ubuntu \
             --distribution jammy \
             --architecture amd64 \
             --archive-areas "main universe" \
@@ -116,8 +114,17 @@ jobs:
             --apt-indices false \
             --debian-installer false \
             --memtest none \
-            --bootappend-live "boot=live components splash" \
-            2>&1 | tee lb-config.log
+            --bootappend-live "boot=live components splash")
+
+          if lb config --help 2>/dev/null | grep -q -- '--debootstrap-options'; then
+            FLAGS+=(--debootstrap-options "--variant=minbase")
+            echo "✓ lb config supports --debootstrap-options; using minbase"
+          else
+            echo "⚠ lb config does not support --debootstrap-options on this runner; continuing without it"
+          fi
+
+          set -x
+          sudo lb config "${FLAGS[@]}" 2>&1 | tee lb-config.log
           LB_CONFIG_EXIT=${PIPESTATUS[0]}
           set +x
           if [ $LB_CONFIG_EXIT -ne 0 ]; then

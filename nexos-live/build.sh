@@ -51,8 +51,7 @@ chmod +x build.sh || true
 
 echo "=== Configuring live-build ==="
 lb clean --all || true
-lb config \
-  --mode ubuntu \
+FLAGS=(--mode ubuntu \
   --distribution jammy \
   --architecture amd64 \
   --archive-areas "main universe" \
@@ -61,7 +60,16 @@ lb config \
   --apt-indices false \
   --debian-installer false \
   --memtest none \
-  --bootappend-live "boot=live components splash" \
+  --bootappend-live "boot=live components splash")
+
+if lb config --help 2>/dev/null | grep -q -- '--debootstrap-options'; then
+  FLAGS+=(--debootstrap-options "--variant=minbase")
+  echo "✓ lb config supports --debootstrap-options; using minbase"
+else
+  echo "⚠ lb config does not support --debootstrap-options on this runner; continuing without it"
+fi
+
+lb config "${FLAGS[@]}" \
   --linux-flavours amd64 \
   --linux-packages "linux-image-generic" \
   || { echo "✗ lb config failed"; exit 1; }
