@@ -10,8 +10,6 @@ openbox
 lightdm
 lightdm-gtk-greeter
 network-manager
-alsa-utils
-zram-tools
 sudo
 curl
 git
