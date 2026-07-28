@@ -62,7 +62,10 @@ lb config \
   --debootstrap-options "--variant=minbase" \
   --debian-installer false \
   --memtest none \
-  --bootappend-live "boot=live components"
+  --bootappend-live "boot=live components splash" \
+  --linux-flavours amd64 \
+  --linux-packages "linux-image-generic" \
+  || { echo "✗ lb config failed"; exit 1; }
 
 echo "=== Running lb build ==="
 set -x
@@ -72,8 +75,8 @@ set +x
 
 if [ "$BUILD_EXIT" -ne 0 ]; then
   echo "✗ lb build failed with exit code $BUILD_EXIT"
-  echo "=== Last 100 lines of build.log ==="
-  tail -100 build.log || true
+  echo "=== Last 200 lines of build.log ==="
+  tail -200 build.log || true
   exit "$BUILD_EXIT"
 fi
 
