@@ -190,7 +190,11 @@ jobs:
         if: success()
         working-directory: nexos-live
         run: |
-          echo "Generating checksum for ISO: $ISO_PATH"
+          echo "Generating checksum for ISO: ${ISO_PATH:-}"
+          if [ -z "${ISO_PATH:-}" ]; then
+            echo "✗ ISO_PATH is empty; cannot generate checksum"
+            exit 1
+          fi
           CHECKSUM_FILE="${ISO_PATH}.sha256"
           sha256sum "$ISO_PATH" > "$CHECKSUM_FILE"
           echo "✓ Checksum generated: $CHECKSUM_FILE"
