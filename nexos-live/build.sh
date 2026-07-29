@@ -95,6 +95,15 @@ ISO_FILE=$(find . -maxdepth 4 -type f \( -name '*.hybrid.iso' -o -name '*.iso' \
 if [ -n "$ISO_FILE" ]; then
   echo "SUCCESS: Found ISO at $ISO_FILE"
   ls -lh "$ISO_FILE"
+  # Copy a stable copy to the repository root so CI can always find it
+  if cp -f "$ISO_FILE" ../nexos.iso 2>/dev/null; then
+    echo "Copied ISO to ../nexos.iso"
+    ls -lh ../nexos.iso || true
+    echo "ISO_PATH=$(realpath ../nexos.iso)" >> "$GITHUB_ENV" 2>/dev/null || echo "ISO_PATH=$(pwd)/$ISO_FILE"
+  else
+    # Fallback: export original path
+    echo "ISO_PATH=$(pwd)/$ISO_FILE" >> "$GITHUB_ENV" 2>/dev/null || true
+  fi
   exit 0
 else
   echo "ERROR: no ISO file found after build"
