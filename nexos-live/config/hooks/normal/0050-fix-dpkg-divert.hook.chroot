@@ -1,32 +1,23 @@
 #!/bin/bash
+set -e
 # Keep this hook non-fatal and lightweight to avoid breaking chroot package setup.
 TARGETS=("/usr/sbin/start-stop-daemon" "/sbin/start-stop-daemon")
 
 for TARGET in "${TARGETS[@]}"; do
     DIVERTED="${TARGET}.distrib"
     echo "[dpkg-divert fix] Checking $TARGET"
-    if dpkg-divert --list "$TARGET" 2>/dev/null | grep -q "$TARGET"; then
+    if dpkg-divert --list | grep -q "^$TARGET" 2>/dev/null; then
         echo "[dpkg-divert fix] diversion record present for $TARGET"
-        if [ -e "$DIVERTED" ]; then
-            if [ -e "$TARGET" ]; then
-                echo "[dpkg-divert fix] both $TARGET and $DIVERTED exist"
-                echo "[dpkg-divert fix] removing any diversion metadata and stale diverted file"
-                dpkg-divert --remove "$TARGET" 2>/dev/null || true
-                dpkg-divert --remove --rename "$TARGET" 2>/dev/null || true
-                rm -f "$DIVERTED" 2>/dev/null || true
-            else
-                echo "[dpkg-divert fix] target missing, restoring diverted copy for $TARGET"
-                dpkg-divert --remove --rename "$TARGET" 2>/dev/null || true
-                rm -f "$DIVERTED" 2>/dev/null || true
-            fi
-        else
-            echo "[dpkg-divert fix] diversion record present but no diverted copy for $TARGET"
-            dpkg-divert --remove "$TARGET" 2>/dev/null || true
-            dpkg-divert --remove --rename "$TARGET" 2>/dev/null || true
-            rm -f "$DIVERTED" 2>/dev/null || true
+        if [ -e "$TARGET" ] && [ -e "$DIVERTED" ]; then
+            echo "[dpkg-divert fix] removing stale target to allow diversion restore"
+            rm -f "$TARGET" 2>/dev/null || true
         fi
+        echo "[dpkg-divert fix] removing diversion metadata and restoring original if needed"
+        dpkg-divert --remove --rename "$TARGET" 2>/dev/null || true
+        dpkg-divert --remove "$TARGET" 2>/dev/null || true
+        rm -f "$DIVERTED" 2>/dev/null || true
     else
         echo "[dpkg-divert fix] no diversion record for $TARGET"
-        rm -f "$TARGET" "$DIVERTED" 2>/dev/null || true
+        rm -f "$DIVERTED" 2>/dev/null || true
     fi
 done

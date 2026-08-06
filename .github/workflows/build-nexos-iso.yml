@@ -177,7 +177,7 @@ jobs:
         run: |
           echo "Checking for ISO output..."
           find . -maxdepth 4 -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) | sort
-          ISO_FILE=$(find . -maxdepth 4 -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) | head -n 1 || true)
+          ISO_FILE=$(find . -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) | head -n 1 || true)
           if [ -n "$ISO_FILE" ]; then
             ISO_PATH=$(pwd)/$ISO_FILE
             echo "ISO_PATH=$ISO_PATH" >> $GITHUB_ENV

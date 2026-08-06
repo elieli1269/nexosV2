@@ -73,6 +73,13 @@ jobs:
         id: locate_iso
         run: |
           set -euxo pipefail
+          echo "Existing ISO_PATH: ${ISO_PATH:-<unset>}"
+          if [ -n "${ISO_PATH:-}" ] && [ -f "${ISO_PATH}" ]; then
+            echo "Using existing ISO_PATH from previous step: $ISO_PATH"
+            echo "ISO_PATH=$ISO_PATH" >> $GITHUB_ENV
+            exit 0
+          fi
+
           cd nexos-live || exit 2
           echo "---- Directory structure (first 30 items) ----"
           find . -type f | head -30 | sort || true
@@ -81,13 +88,17 @@ jobs:
           find . -type f \( -name '*.iso' -o -name '*.hybrid.iso' \) | sort || true
           echo ""
           ISO=$(find . \( -path './cache/bootstrap/etc/ssl/private' -o -path './cache/bootstrap/etc/ssl/private/*' \) -prune -o -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) -print -quit 2>/dev/null || true)
+          if [ -z "$ISO" ]; then
+            echo "Searching repo root for fallback ISO artifact"
+            ISO=$(find .. -maxdepth 1 -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) | sort | head -n 1 || true)
+          fi
           if [ -n "$ISO" ]; then
             ISO_ABS="$(cd "$(dirname "$ISO")" && pwd)/$(basename "$ISO")"
             echo "ISO_PATH=$ISO_ABS" >> $GITHUB_ENV
             echo "Found ISO: $ISO_ABS"
             ls -lh "$ISO_ABS"
           else
-            echo "No ISO found in nexos-live directory tree"
+            echo "No ISO found after fallback search"
             echo "ISO_PATH=" >> $GITHUB_ENV
           fi
 

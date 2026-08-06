@@ -99,10 +99,14 @@ if [ -n "$ISO_FILE" ]; then
   if cp -f "$ISO_FILE" ../nexos.iso 2>/dev/null; then
     echo "Copied ISO to ../nexos.iso"
     ls -lh ../nexos.iso || true
-    echo "ISO_PATH=$(realpath ../nexos.iso)" >> "$GITHUB_ENV" 2>/dev/null || echo "ISO_PATH=$(pwd)/$ISO_FILE"
+    ISO_PATH=$(realpath ../nexos.iso)
+    echo "ISO_PATH=$ISO_PATH" >> "$GITHUB_ENV" 2>/dev/null || true
+    echo "✓ exported ISO_PATH to GITHUB_ENV: $ISO_PATH"
   else
     # Fallback: export original path
-    echo "ISO_PATH=$(pwd)/$ISO_FILE" >> "$GITHUB_ENV" 2>/dev/null || true
+    ISO_PATH=$(pwd)/$ISO_FILE
+    echo "ISO_PATH=$ISO_PATH" >> "$GITHUB_ENV" 2>/dev/null || true
+    echo "✓ exported fallback ISO_PATH to GITHUB_ENV: $ISO_PATH"
   fi
   exit 0
 else
