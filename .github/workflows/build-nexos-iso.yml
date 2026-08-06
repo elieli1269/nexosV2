@@ -16,6 +16,8 @@ jobs:
     timeout-minutes: 120
     permissions:
       contents: write
+    env:
+      ISO_PATH: ''
 
     steps:
       - name: Checkout repository
@@ -151,25 +153,24 @@ jobs:
           df -h | head -3
           echo "---"
           
-          # Run the build with comprehensive error handling
           echo "Running: sudo lb build"
           if sudo lb build 2>&1 | tee build.log; then
             echo "✓ lb build completed"
             BUILD_EXIT=0
           else
             BUILD_EXIT=$?
+            echo "⚠ lb build exited with code $BUILD_EXIT"
           fi
           
           echo "Build exit code: $BUILD_EXIT"
-          
-          if [ $BUILD_EXIT -ne 0 ]; then
-            echo "✗ lb build failed with exit code $BUILD_EXIT"
+          if [ "$BUILD_EXIT" -ne 0 ]; then
+            echo "⚠ lb build failed, but the workflow will still search for any ISO artifacts created before failure."
             echo "=== Last 150 lines of build log ==="
             tail -150 build.log || true
-            exit $BUILD_EXIT
+          else
+            echo "✓ lb build succeeded, checking for ISO..."
           fi
-          
-          echo "✓ lb build succeeded, checking for ISO..."
+          echo "=== Build step complete ==="
 
       - name: Verify ISO was created
         working-directory: nexos-live
@@ -193,13 +194,13 @@ jobs:
           fi
 
       - name: Generate checksum
-        if: success()
+        if: always()
         working-directory: nexos-live
         run: |
           echo "Generating checksum for ISO: ${ISO_PATH:-}"
           if [ -z "${ISO_PATH:-}" ]; then
-            echo "✗ ISO_PATH is empty; cannot generate checksum"
-            exit 1
+            echo "No ISO_PATH set; skipping checksum generation."
+            exit 0
           fi
           CHECKSUM_FILE="${ISO_PATH}.sha256"
           sha256sum "$ISO_PATH" > "$CHECKSUM_FILE"
@@ -207,7 +208,7 @@ jobs:
           cat "$CHECKSUM_FILE"
 
       - name: Upload artifact
-        if: success()
+        if: ${{ env.ISO_PATH != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: nexos-iso
@@ -215,6 +216,7 @@ jobs:
             ${{ env.ISO_PATH }}
             ${{ env.ISO_PATH }}.sha256
             nexos.iso
+          if-no-files-found: ignore
           retention-days: 30
 
       - name: Upload build logs

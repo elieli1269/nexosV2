@@ -1,9 +1,32 @@
 #!/bin/bash
 # Keep this hook non-fatal and lightweight to avoid breaking chroot package setup.
-set -e
-TARGET="/usr/sbin/start-stop-daemon"
-DIVERTED="${TARGET}.distrib"
+TARGETS=("/usr/sbin/start-stop-daemon" "/sbin/start-stop-daemon")
 
-echo "[dpkg-divert fix] Checking for start-stop-daemon state"
-dpkg-divert --list "$TARGET" 2>/dev/null | grep -q "$TARGET" && echo "[dpkg-divert fix] diversion present" || echo "[dpkg-divert fix] no diversion"
-rm -f "$TARGET" "$DIVERTED" 2>/dev/null || true
+for TARGET in "${TARGETS[@]}"; do
+    DIVERTED="${TARGET}.distrib"
+    echo "[dpkg-divert fix] Checking $TARGET"
+    if dpkg-divert --list "$TARGET" 2>/dev/null | grep -q "$TARGET"; then
+        echo "[dpkg-divert fix] diversion record present for $TARGET"
+        if [ -e "$DIVERTED" ]; then
+            if [ -e "$TARGET" ]; then
+                echo "[dpkg-divert fix] both $TARGET and $DIVERTED exist"
+                echo "[dpkg-divert fix] removing any diversion metadata and stale diverted file"
+                dpkg-divert --remove "$TARGET" 2>/dev/null || true
+                dpkg-divert --remove --rename "$TARGET" 2>/dev/null || true
+                rm -f "$DIVERTED" 2>/dev/null || true
+            else
+                echo "[dpkg-divert fix] target missing, restoring diverted copy for $TARGET"
+                dpkg-divert --remove --rename "$TARGET" 2>/dev/null || true
+                rm -f "$DIVERTED" 2>/dev/null || true
+            fi
+        else
+            echo "[dpkg-divert fix] diversion record present but no diverted copy for $TARGET"
+            dpkg-divert --remove "$TARGET" 2>/dev/null || true
+            dpkg-divert --remove --rename "$TARGET" 2>/dev/null || true
+            rm -f "$DIVERTED" 2>/dev/null || true
+        fi
+    else
+        echo "[dpkg-divert fix] no diversion record for $TARGET"
+        rm -f "$TARGET" "$DIVERTED" 2>/dev/null || true
+    fi
+done
