@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-iso:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     timeout-minutes: 120
     permissions:
       contents: write
@@ -108,7 +108,7 @@ jobs:
           echo ""
           echo "Running lb config with comprehensive output..."
           FLAGS=(--mode ubuntu \
-            --distribution jammy \
+            --distribution focal \
             --architecture amd64 \
             --archive-areas "main universe" \
             --binary-images iso-hybrid \
