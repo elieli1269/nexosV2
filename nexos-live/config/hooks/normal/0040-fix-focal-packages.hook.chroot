@@ -1,0 +1,36 @@
+#!/bin/bash
+# Fix package availability issues for focal distribution
+# This hook removes packages that are not available in focal but might be
+# automatically included by live-build (e.g., theme packages)
+
+set -e
+
+echo "[focal-fix] Removing unavailable packages from focal distribution..."
+
+# List of packages to remove (they don't exist in focal)
+PACKAGES_TO_REMOVE=(
+  "gfxboot-theme-ubuntu"
+  "syslinux-themes-ubuntu-oneiric"
+  "grub-pc-bin"  # sometimes causes issues on iso-hybrid
+)
+
+# Also remove packages that might bloat the ISO unnecessarily
+BLOAT_PACKAGES=(
+  "ubuntu-report"
+  "popularity-contest"
+  "apt-listchanges"
+)
+
+ALL_REMOVE=("${PACKAGES_TO_REMOVE[@]}" "${BLOAT_PACKAGES[@]}")
+
+for pkg in "${ALL_REMOVE[@]}"; do
+    echo "[focal-fix] Checking if $pkg is installed..."
+    if dpkg -l | grep -q "^ii  $pkg"; then
+        echo "[focal-fix] Removing $pkg..."
+        apt-get remove -y "$pkg" 2>/dev/null || echo "[focal-fix] Could not remove $pkg (may not be installed)"
+    else
+        echo "[focal-fix] Package $pkg not found (OK)"
+    fi
+done
+
+echo "[focal-fix] Package cleanup complete"

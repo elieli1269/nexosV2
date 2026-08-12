@@ -1,0 +1,23 @@
+#!/bin/bash
+# Clean up generated package lists to remove packages unavailable in focal
+# This runs BEFORE lb config actually installs packages
+
+echo "[pkg-cleanup] Cleaning package lists for focal compatibility..."
+
+# If package list files exist, remove problematic entries
+if [ -d "config/package-lists" ]; then
+    echo "[pkg-cleanup] Found config/package-lists, cleaning..."
+    for pkglist in config/package-lists/*.{chroot,binary}; do
+        if [ -f "$pkglist" ]; then
+            echo "[pkg-cleanup] Processing $pkglist"
+            # Remove unavailable packages
+            sed -i '/gfxboot-theme-ubuntu/d' "$pkglist"
+            sed -i '/syslinux-themes-ubuntu-oneiric/d' "$pkglist"
+            sed -i '/grub-pc-bin/d' "$pkglist"
+            sed -i '/ubuntu-report/d' "$pkglist"
+            sed -i '/popularity-contest/d' "$pkglist"
+        fi
+    done
+fi
+
+echo "[pkg-cleanup] Cleanup complete"
