@@ -129,7 +129,13 @@ jobs:
           echo "Cleaning package lists to remove focal-incompatible packages..."
           # Preemptively clean package lists if they exist
           if [ -d "config/package-lists" ]; then
-            for f in config/package-lists/*; do [ -f "$f" ] && sed -i '/gfxboot\|syslinux-themes\|ubuntu-report/d' "$f"; done
+            for f in config/package-lists/*; do 
+              if [ -f "$f" ]; then
+                echo "Cleaning $f..."
+                sed -i '/gfxboot\|syslinux-themes\|ubuntu-report\|grub-themes\|memtest/d' "$f"
+                cat "$f"
+              fi
+            done
           fi
 
           set -x
@@ -152,6 +158,14 @@ jobs:
           echo "Verifying live-build configuration..."
           ls -la config/ | head -20
           [ -f "config/bootstrap" ] && echo "✓ config/bootstrap exists" || echo "⚠ config/bootstrap not found"
+          
+          echo "Final cleanup of problematic packages from generated config..."
+          if [ -f "config/package-lists/live.list.chroot" ]; then
+            echo "Cleaning generated live.list.chroot..."
+            sed -i '/gfxboot\|syslinux-themes\|ubuntu-report\|grub-themes\|memtest/d' config/package-lists/live.list.chroot
+            echo "Contents after cleanup:"
+            head -20 config/package-lists/live.list.chroot || true
+          fi
 
       - name: Build ISO
         working-directory: nexos-live
