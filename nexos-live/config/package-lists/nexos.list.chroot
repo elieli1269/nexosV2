@@ -9,6 +9,7 @@ xinit
 openbox
 lightdm
 lightdm-gtk-greeter
+firefox-esr
 network-manager
 alsa-utils
 zram-tools

@@ -28,7 +28,7 @@ jobs:
 
     - name: Lint / Syntax check backend
       run: |
-        python -m py_compile nexos-live/config/includes.chroot/usr/local/bin/nexos-backend.py || true
+        python -m py_compile nexos-live/config/includes.chroot/usr/local/bin/nexos-backend.py
 
     - name: Sanity check UI
       run: |

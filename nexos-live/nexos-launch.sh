@@ -17,5 +17,5 @@ elif command -v google-chrome >/dev/null 2>&1; then
 elif command -v firefox >/dev/null 2>&1; then
   exec firefox --kiosk "file:///usr/share/nexos-ui/index.html"
 else
-  exec x-www-browser "file:///usr/share/nexos-ui/index.html"
+  exec firefox-esr --kiosk "file:///usr/share/nexos-ui/index.html"
 fi

@@ -65,7 +65,7 @@ jobs:
           fi
           tail -n 100 ../build.log || true
           echo "==== Post-build directory listing in nexos-live ===="
-          find . -type f | sort | sed 's#^#FILE: #' || true
+          find . -maxdepth 2 -type f \( -name '*.iso' -o -name '*.img' \) -print | sort | sed 's#^#FILE: #' || true
           echo "==== Build step complete ===="
       
       - name: Locate ISO artifact
@@ -81,22 +81,21 @@ jobs:
           fi
 
           cd nexos-live || exit 2
-          echo "---- Directory structure (first 30 items) ----"
-          find . -type f | head -30 | sort || true
+          echo "---- Generated files (first 30 items) ----"
+          find . -maxdepth 2 -type f \( -name '*.iso' -o -name '*.img' -o -name '*.log' \) -print | head -30 | sort || true
           echo ""
-          echo "---- Searching for all .iso files (recursive) ----"
-          find . -type f \( -name '*.iso' -o -name '*.hybrid.iso' \) | sort || true
-          echo ""
-          ISO=$(find . \( -path './cache/bootstrap/etc/ssl/private' -o -path './cache/bootstrap/etc/ssl/private/*' \) -prune -o -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) -print -quit 2>/dev/null || true)
+          echo "---- Searching generated ISO files ----"
+          ISO=$(find . -maxdepth 2 -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) -print -quit 2>/dev/null || true)
           if [ -z "$ISO" ]; then
             echo "Searching repo root for fallback ISO artifact"
             ISO=$(find .. -maxdepth 1 -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) | sort | head -n 1 || true)
           fi
           if [ -n "$ISO" ]; then
-            ISO_ABS="$(cd "$(dirname "$ISO")" && pwd)/$(basename "$ISO")"
-            echo "ISO_PATH=$ISO_ABS" >> $GITHUB_ENV
-            echo "Found ISO: $ISO_ABS"
-            ls -lh "$ISO_ABS"
+            ISO_REL="${ISO#./}"
+            ISO_PATH="nexos-live/$ISO_REL"
+            echo "ISO_PATH=$ISO_PATH" >> $GITHUB_ENV
+            echo "Found ISO: $(pwd)/$ISO_REL"
+            ls -lh "$ISO_REL"
           else
             echo "No ISO found after fallback search"
             echo "ISO_PATH=" >> $GITHUB_ENV
@@ -119,15 +118,34 @@ jobs:
           path: build.log
           retention-days: 7
 
+      - name: Collect ISO artifact candidates
+        if: always()
+        id: collect_iso
+        run: |
+          set -eux
+          cd nexos-live
+          rm -rf iso_upload
+          mkdir -p iso_upload
+          find . -maxdepth 2 -type f \( -name '*.hybrid.iso' -o -name '*.iso' \) | sort > iso_paths.txt || true
+          if [ -s iso_paths.txt ]; then
+            echo "found=true" >> $GITHUB_OUTPUT
+            while IFS= read -r iso; do
+              iso_rel=${iso#./}
+              echo "Copying $iso_rel"
+              mkdir -p "iso_upload/$(dirname "$iso_rel")"
+              cp "$iso" "iso_upload/$iso_rel"
+            done < iso_paths.txt
+            ls -lhR iso_upload || true
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Debug upload directory listing
         if: always()
         run: |
           cd nexos-live
-          echo "=== Complete directory tree ===" > /tmp/dir_listing.txt
-          find . -type f -name '*.iso' -o -type f -name '*.img' >> /tmp/dir_listing.txt 2>&1 || true
-          echo "" >> /tmp/dir_listing.txt
-          echo "=== All files with details ===" >> /tmp/dir_listing.txt
-          find . -type f | xargs ls -lh >> /tmp/dir_listing.txt 2>&1 || true
+          echo "=== Generated image files ===" > /tmp/dir_listing.txt
+          find . -maxdepth 2 -type f \( -name '*.iso' -o -name '*.img' \) -exec ls -lh {} \; >> /tmp/dir_listing.txt 2>&1 || true
           cat /tmp/dir_listing.txt
 
       - name: Upload directory listing debug
@@ -144,16 +162,15 @@ jobs:
         with:
           name: nexos-iso
           path: ${{ env.ISO_PATH }}
+          if-no-files-found: ignore
           retention-days: 30
 
       - name: Upload any ISO artifacts found (fallback)
-        if: always()
+        if: steps.collect_iso.outputs.found == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: nexos-iso-fallback
-          path: |
-            nexos-live/*.iso
-            nexos-live/**/*.iso
+          path: nexos-live/iso_upload
           if-no-files-found: ignore
           retention-days: 30
 
