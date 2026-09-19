@@ -52,7 +52,7 @@ chmod +x build.sh || true
 echo "=== Configuring live-build ==="
 lb clean --all || true
 FLAGS=(--mode ubuntu \
-  --distribution focal \
+  --distribution jammy \
   --architecture amd64 \
   --archive-areas "main universe" \
   --binary-images iso-hybrid \
